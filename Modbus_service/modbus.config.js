@@ -1,5 +1,5 @@
 module.exports = {
-
+ 
   // RS485 CONFIG
   comPort: "COM2",
 
