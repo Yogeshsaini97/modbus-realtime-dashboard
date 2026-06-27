@@ -1,23 +1,42 @@
+
+
+import { Button } from "@mui/material";
 import StatusCard from "../../Components/Cards/StatusCard";
 import Header from "../../Components/Layout/Header";
-import useMachineData from "../../Hooks/useMachineData";
+import { useMachine } from "../../Context/MachineContext";
 import "./Dashboard.css";
-
+import MachineReportDialog from "../../Components/report/MachineReportDialog";
+import { useState } from "react";
 
 function Dashboard() {
 
+    const [openReport, setOpenReport] = useState(false);
     const {
 
         machineData,
 
-        connected
+        connected,
 
-    } = useMachineData();
+        runtime,
+
+        events
+
+    } = useMachine();
 
     return (
 
         <div>
+<Button
+    variant="contained"
+    onClick={() => setOpenReport(true)}
+>
+    Machine Report
+</Button>
 
+<MachineReportDialog
+    open={openReport}
+    onClose={() => setOpenReport(false)}
+/>
             <Header connected={connected} />
 
             <div className="dashboard">
@@ -25,9 +44,11 @@ function Dashboard() {
                 <StatusCard
                     title="Power"
                     value={machineData.power}
-                    color={machineData.power === "ON"
-                        ? "#22C55E"
-                        : "#EF4444"}
+                    color={
+                        machineData.power === "ON"
+                            ? "#22C55E"
+                            : "#EF4444"
+                    }
                 />
 
                 <StatusCard
