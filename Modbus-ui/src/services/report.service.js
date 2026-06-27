@@ -46,7 +46,7 @@ class ReportService {
 
             worksheet,
 
-            "Machine Report"
+            "View & download operational history"
 
         );
 

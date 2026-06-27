@@ -28,7 +28,7 @@ console.log(Array.isArray(history));
         >
 
             <DialogTitle>
-                Machine Report
+                View & download operational history
             </DialogTitle>
 
             <Divider />
