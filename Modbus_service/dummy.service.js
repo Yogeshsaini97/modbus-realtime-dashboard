@@ -1,73 +1,91 @@
 const { emitModbusData } = require("./socket");
 
-let speed = 1000;
+// Register 10001
+let motorStatus = "ON";
 
-let temperature = 30;
+// Register 40501
+let motorRPM = 2500;
 
-let torque = 20;
+// Register 40505
+let pipeLength = 0;
 
 function generateDummyData() {
 
-  speed += Math.floor(Math.random() * 100 - 50);
+    // Randomly stop the machine (about once every few minutes)
+    if (motorStatus === "ON" && Math.random() > 0.995) {
 
-  temperature += Math.random() * 2 - 1;
-
-  torque += Math.random() * 4 - 2;
-
-  if (speed < 500) speed = 500;
-
-  if (speed > 3000) speed = 3000;
-
-  if (temperature < 20) temperature = 20;
-
-  if (temperature > 90) temperature = 90;
-
-  if (torque < 0) torque = 0;
-
-  if (torque > 100) torque = 100;
-
-  return {
-
-    timestamp: Date.now(),
-
-    registers: {
-
-      speed,
-
-      temperature: Number(temperature.toFixed(2)),
-
-      torque: Number(torque.toFixed(2)),
-
-      voltage: 220 + Math.floor(Math.random() * 10),
-
-      current: Number((5 + Math.random() * 2).toFixed(2)),
-
-      vibration: Math.floor(Math.random() * 20),
-
-      alarm: Math.random() > 0.95
+        motorStatus = "OFF";
+        motorRPM = 0;
 
     }
 
-  };
+    // Randomly restart the machine
+    if (motorStatus === "OFF" && Math.random() > 0.97) {
+
+        motorStatus = "ON";
+        motorRPM = 2500;
+
+    }
+
+    // Machine Running
+    if (motorStatus === "ON") {
+
+        // RPM fluctuates naturally
+        motorRPM += Math.floor(Math.random() * 21) - 10;
+
+        if (motorRPM < 2450) motorRPM = 2450;
+        if (motorRPM > 2550) motorRPM = 2550;
+
+        // Pipe length increases
+        pipeLength += Math.floor(Math.random() * 120) + 80;
+
+        // New pipe starts after reaching 6000 mm
+        if (pipeLength >= 6000) {
+
+            pipeLength = 0;
+
+        }
+
+    }
+
+    return {
+
+        timestamp: Date.now(),
+
+        registers: {
+
+            motorStatus,
+
+            motorRPM,
+
+            pipeLength
+
+        }
+
+    };
 
 }
 
 function startDummyPolling() {
 
-  console.log("Dummy Modbus Started");
+    console.log("Dummy Modbus Started...");
 
-  setInterval(() => {
+    setInterval(() => {
 
-    const payload = generateDummyData();
+        const payload = generateDummyData();
 
-    console.log(payload);
+        console.clear();
 
-    emitModbusData(payload);
+        console.table(payload.registers);
 
-  }, 1000);
+        emitModbusData(payload);
+
+    }, 1000);
 
 }
 
 module.exports = {
-  startDummyPolling
+
+    startDummyPolling
+
 };

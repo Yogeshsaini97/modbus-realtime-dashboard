@@ -1,119 +1,175 @@
 const ModbusRTU = require("modbus-serial");
-
 const { emitModbusData } = require("./socket");
 
 const client = new ModbusRTU();
 
+let pollingTimer = null;
+
+const CONFIG = {
+
+    host: "192.168.3.250",
+
+    port: 502,
+
+    slaveId: 1,
+
+    pollingInterval: 1000
+
+};
+
 async function connectRealModbus() {
 
-  try {
+    try {
 
-    console.log("Connecting Real Modbus...");
+        console.log("================================");
+        console.log("Connecting Modbus TCP...");
+        console.log("================================");
 
-    await client.connectRTUBuffered("COM2", {
+        await client.connectTCP(CONFIG.host, {
 
-      baudRate: 9600,
+            port: CONFIG.port
 
-      dataBits: 8,
+        });
 
-      parity: "none",
+        client.setID(CONFIG.slaveId);
 
-      stopBits: 1
+        console.log("✅ Connected Successfully");
+        console.log(`PLC : ${CONFIG.host}:${CONFIG.port}`);
+        console.log(`Slave ID : ${CONFIG.slaveId}`);
 
-    });
+        startPolling();
 
-    client.setID(1);
+    }
 
-    console.log("Real Modbus Connected");
+    catch (error) {
 
-    startRealPolling();
+        console.log("❌ Connection Failed");
+        console.log(error.message);
 
-  } catch (error) {
+        reconnect();
 
-    console.log("Modbus Connection Failed");
-
-    console.log(error.message);
-
-    reconnect();
-
-  }
-
-}
-
-async function pollRealData() {
-
-  try {
-
-    // READ HOLDING REGISTERS
-
-    const response = await client.readHoldingRegisters(0, 10);
-
-    const registers = response.data;
-
-    // CONVERT RAW REGISTERS TO MEANINGFUL DATA
-
-    const payload = {
-
-      timestamp: Date.now(),
-
-      registers: {
-
-        speed: registers[0],
-
-        temperature: registers[1] / 10,
-
-        torque: registers[2],
-
-        voltage: registers[3],
-
-        current: registers[4] / 100,
-
-        vibration: registers[5],
-
-        alarm: registers[6] === 1
-
-      }
-
-    };
-
-    console.log(payload);
-
-    emitModbusData(payload);
-
-  } catch (error) {
-
-    console.log("Polling Error");
-
-    console.log(error.message);
-
-    reconnect();
-
-  }
+    }
 
 }
 
-function startRealPolling() {
+async function pollMachineData() {
 
-  setInterval(async () => {
+    try {
 
-    await pollRealData();
+        /*
+            Read Holding Registers
 
-  }, 1000);
+            40500
+            40501 -> Motor RPM
+            40502
+            40503
+            40504
+            40505 -> Pipe Length
+        */
+
+        const response =
+            await client.readHoldingRegisters(500, 6);
+
+        const registers = response.data;
+
+        /*
+            TODO
+
+            Read Motor Status once
+            register 10001 is confirmed.
+
+            Example:
+
+            const di = await client.readDiscreteInputs(0,1);
+
+            const motorStatus =
+                di.data[0]
+                ? "ON"
+                : "OFF";
+        */
+
+        const payload = {
+
+            timestamp: Date.now(),
+
+            registers: {
+
+                motorStatus: "UNKNOWN",
+
+                motorRPM: registers[1],
+
+                pipeLength: registers[5]
+
+            }
+
+        };
+
+        console.clear();
+
+        console.table(payload.registers);
+
+        emitModbusData(payload);
+
+    }
+
+    catch (error) {
+
+        console.log("Polling Error");
+
+        console.log(error.message);
+
+        reconnect();
+
+    }
+
+}
+
+function startPolling() {
+
+    if (pollingTimer) {
+
+        clearInterval(pollingTimer);
+
+    }
+
+    pollingTimer = setInterval(() => {
+
+        pollMachineData();
+
+    }, CONFIG.pollingInterval);
 
 }
 
 function reconnect() {
 
-  setTimeout(async () => {
+    if (pollingTimer) {
 
-    console.log("Reconnecting Modbus...");
+        clearInterval(pollingTimer);
 
-    await connectRealModbus();
+        pollingTimer = null;
 
-  }, 5000);
+    }
+
+    try {
+
+        client.close();
+
+    }
+
+    catch (err) {}
+
+    console.log("Reconnecting in 5 seconds...");
+
+    setTimeout(() => {
+
+        connectRealModbus();
+
+    }, 5000);
 
 }
 
 module.exports = {
-  connectRealModbus
+
+    connectRealModbus
+
 };

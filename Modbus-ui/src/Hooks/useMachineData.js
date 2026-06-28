@@ -1,27 +1,15 @@
 import { useEffect, useState } from "react";
 import socket from "../Socket/Socket";
 
-
-
 function useMachineData() {
 
     const [machineData, setMachineData] = useState({
 
-        power: "OFF",
+        motorStatus: "OFF",
 
-        speed: 0,
+        motorRPM: 0,
 
-        temperature: 0,
-
-        torque: 0,
-
-        voltage: 0,
-
-        current: 0,
-
-        vibration: 0,
-
-        alarm: false,
+        pipeLength: 0,
 
         timestamp: null
 
@@ -53,21 +41,11 @@ function useMachineData() {
 
             setMachineData({
 
-                power: payload.registers.speed > 0 ? "ON" : "OFF",
+                motorStatus: payload.registers.motorStatus,
 
-                speed: payload.registers.speed,
+                motorRPM: payload.registers.motorRPM,
 
-                temperature: payload.registers.temperature,
-
-                torque: payload.registers.torque,
-
-                voltage: payload.registers.voltage,
-
-                current: payload.registers.current,
-
-                vibration: payload.registers.vibration,
-
-                alarm: payload.registers.alarm,
+                pipeLength: payload.registers.pipeLength,
 
                 timestamp: payload.timestamp
 

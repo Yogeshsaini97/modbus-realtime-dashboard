@@ -2,17 +2,13 @@ import { useEffect, useState } from "react";
 
 import MachineContext from "./MachineContext";
 
-
-
 import StorageService from "../services/storage.service";
-
 import HistoryService from "../services/history.service";
-
 import RuntimeService from "../services/runtime.service";
-
 import EventService from "../services/event.service";
 
 import { APP_CONFIG } from "../config/app.config";
+
 import socket from "../Socket/Socket";
 
 function MachineProvider({ children }) {
@@ -27,21 +23,11 @@ function MachineProvider({ children }) {
 
             {
 
-                power: "OFF",
+                motorStatus: "OFF",
 
-                speed: 0,
+                motorRPM: 0,
 
-                temperature: 0,
-
-                current: 0,
-
-                voltage: 0,
-
-                torque: 0,
-
-                vibration: 0,
-
-                alarm: false,
+                pipeLength: 0,
 
                 timestamp: null
 
@@ -87,37 +73,21 @@ function MachineProvider({ children }) {
 
             const newState = {
 
-                power:
+                motorStatus: payload.registers.motorStatus,
 
-                    payload.registers.speed > 0
+                motorRPM: payload.registers.motorRPM,
 
-                        ? "ON"
-
-                        : "OFF",
-
-                speed: payload.registers.speed,
-
-                temperature: payload.registers.temperature,
-
-                current: payload.registers.current,
-
-                voltage: payload.registers.voltage,
-
-                torque: payload.registers.torque,
-
-                vibration: payload.registers.vibration,
-
-                alarm: payload.registers.alarm,
+                pipeLength: payload.registers.pipeLength,
 
                 timestamp: payload.timestamp
 
             };
 
-            // Previous state
+            // Previous Machine Status
 
-            const previousPower = machineData.power;
+            const previousStatus = machineData.motorStatus;
 
-            // Save latest state
+            // Save Latest State
 
             StorageService.save(
 
@@ -127,7 +97,7 @@ function MachineProvider({ children }) {
 
             );
 
-            // Save history
+            // Save History
 
             const updatedHistory =
 
@@ -139,7 +109,7 @@ function MachineProvider({ children }) {
 
                 RuntimeService.update(
 
-                    newState.power
+                    newState.motorStatus
 
                 );
 
@@ -149,13 +119,13 @@ function MachineProvider({ children }) {
 
             if (
 
-                previousPower !== newState.power
+                previousStatus !== newState.motorStatus
 
             ) {
 
                 updatedEvents = EventService.add(
 
-                    newState.power === "ON"
+                    newState.motorStatus === "ON"
 
                         ? "Motor Started"
 
