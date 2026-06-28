@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import { useMachine } from "../../../Context/MachineContext";
 import { useState } from "react";
 import MachineReportDialog from "../../report/MachineReportDialog";
+import pdfReportService from "../../report/pdfReport.service";
 
 
 
@@ -24,6 +25,12 @@ function Header() {
 
     const { connected } = useMachine();
      const [openReport, setOpenReport] = useState(false);
+
+      const {
+        machineData,
+        history,
+        runtime
+    } = useMachine();
 
     return (
 
@@ -49,7 +56,7 @@ function Header() {
 
                     <Typography variant="h6">
 
-                        Vansh Industries
+                        Widhin Imap
 
                     </Typography>
 
@@ -73,6 +80,31 @@ function Header() {
     sx={{  marginInline:"12px"}}
 >
     View & download operational history
+</Button>
+<Button
+ sx={{  marginInline:"12px"}}
+    variant="contained"
+
+    color="error"
+
+    onClick={() =>
+
+        pdfReportService.download(
+
+            machineData,
+
+            history,
+
+            runtime
+
+        )
+
+    }
+
+>
+
+    Download PDF Report
+
 </Button>
 
 

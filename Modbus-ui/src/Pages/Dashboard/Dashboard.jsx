@@ -19,7 +19,7 @@ import EngineeringIcon from "@mui/icons-material/Engineering";
 
 import BoltIcon from "@mui/icons-material/Bolt";
 import SpeedIcon from "@mui/icons-material/Speed";
-import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
+import StraightenIcon from "@mui/icons-material/Straighten";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
@@ -193,14 +193,14 @@ color:"#22C55E"
 
                         <StatusWidget
                        
-                            title="POWER STATUS"
-                            value={machineData.power}
-                            subtitle="Machine Healthy"
-                            color={
-                                machineData.power === "ON"
-                                    ? "#22C55E"
-                                    : "#EF4444"
-                            }
+                            title="MOTOR STATUS"
+value={machineData.motorStatus}
+subtitle="Machine Running"
+color={
+    machineData.motorStatus === "ON"
+        ? "#22C55E"
+        : "#EF4444"
+}
                             icon={
                                 <BoltIcon
                                     sx={{ fontSize: 42 }}
@@ -213,9 +213,11 @@ color:"#22C55E"
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
                         <StatusWidget
-                            title="MOTOR SPEED"
-                            value={`${machineData.speed}`}
-                            unit="RPM"
+                           title="MOTOR RPM"
+
+value={machineData.motorRPM}
+
+unit="RPM"
                             subtitle="Realtime"
                             color="#2563EB"
                             icon={
@@ -230,13 +232,16 @@ color:"#22C55E"
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
                         <StatusWidget
-                            title="TEMPERATURE"
-                            value={`${machineData.temperature}`}
-                            unit="°C"
-                            subtitle="Normal"
+                           title="PIPE LENGTH"
+
+value={machineData.pipeLength}
+
+unit="mm"
+
+subtitle="Current Pipe"
                             color="#F59E0B"
                             icon={
-                                <DeviceThermostatIcon
+                                <StraightenIcon
                                     sx={{ fontSize: 42 }}
                                 />
                             }
@@ -247,16 +252,17 @@ color:"#22C55E"
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
                         <StatusWidget
-                            title="CURRENT"
-                            value={`${machineData.current}`}
-                            unit="A"
-                            subtitle="Running"
-                            color="#EF4444"
-                            icon={
-                                <ElectricBoltIcon
-                                    sx={{ fontSize: 42 }}
-                                />
-                            }
+                            title="TODAY'S RUNTIME"
+
+value={runtime.todayRuntime || 0}
+
+unit="sec"
+
+subtitle="Today's Production"
+
+color="#A855F7"
+
+icon={<AccessTimeFilledIcon sx={{fontSize:42}} />}
                         />
 
                     </Grid>

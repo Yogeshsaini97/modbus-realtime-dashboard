@@ -1,17 +1,17 @@
 import {
+    Chip,
+    Paper,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
-    Paper
+    TableRow
 } from "@mui/material";
 
 import dayjs from "dayjs";
+
 import { useMachine } from "../../Context/MachineContext";
-
-
 
 function ReportTable() {
 
@@ -23,7 +23,8 @@ function ReportTable() {
             component={Paper}
             sx={{
                 mt: 3,
-                maxHeight: 500
+                maxHeight: 500,
+                borderRadius: 3
             }}
         >
 
@@ -33,21 +34,21 @@ function ReportTable() {
 
                     <TableRow>
 
-                        <TableCell>Time</TableCell>
+                        <TableCell>
+                            <strong>Date & Time</strong>
+                        </TableCell>
 
-                        <TableCell>Power</TableCell>
+                        <TableCell align="center">
+                            <strong>Motor Status</strong>
+                        </TableCell>
 
-                        <TableCell>Speed</TableCell>
+                        <TableCell align="center">
+                            <strong>Motor RPM</strong>
+                        </TableCell>
 
-                        <TableCell>Temperature</TableCell>
-
-                        <TableCell>Current</TableCell>
-
-                        <TableCell>Voltage</TableCell>
-
-                        <TableCell>Torque</TableCell>
-
-                        <TableCell>Alarm</TableCell>
+                        <TableCell align="center">
+                            <strong>Pipe Length</strong>
+                        </TableCell>
 
                     </TableRow>
 
@@ -57,7 +58,10 @@ function ReportTable() {
 
                     {history.map((row) => (
 
-                        <TableRow key={row.timestamp}>
+                        <TableRow
+                            hover
+                            key={row.timestamp}
+                        >
 
                             <TableCell>
 
@@ -67,23 +71,41 @@ function ReportTable() {
 
                             </TableCell>
 
-                            <TableCell>{row.power}</TableCell>
+                            <TableCell align="center">
 
-                            <TableCell>{row.speed} RPM</TableCell>
+                                <Chip
 
-                            <TableCell>{row.temperature} °C</TableCell>
+                                    size="small"
 
-                            <TableCell>{row.current} A</TableCell>
+                                    label={row.motorStatus}
 
-                            <TableCell>{row.voltage} V</TableCell>
+                                    color={
+                                        row.motorStatus === "ON"
+                                            ? "success"
+                                            : "error"
+                                    }
 
-                            <TableCell>{row.torque}</TableCell>
+                                />
 
-                            <TableCell>
+                            </TableCell>
 
-                                {row.alarm
-                                    ? "Alarm"
-                                    : "No Alarm"}
+                            <TableCell align="center">
+
+                                <strong>
+
+                                    {row.motorRPM} RPM
+
+                                </strong>
+
+                            </TableCell>
+
+                            <TableCell align="center">
+
+                                <strong>
+
+                                    {row.pipeLength} mm
+
+                                </strong>
 
                             </TableCell>
 
