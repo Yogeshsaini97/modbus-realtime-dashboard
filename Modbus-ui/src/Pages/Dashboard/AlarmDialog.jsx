@@ -80,7 +80,7 @@ function AlarmDialog({
                     mt={1}
                 >
 
-                    LOW FREQUENCY ALARM
+                   LOW FREQUENCY (Below 40 Hz)
 
                 </Typography>
 
@@ -91,16 +91,16 @@ function AlarmDialog({
                     }}
                 />
 
-                <Typography
-                    fontSize={18}
-                    color="#DDD"
-                >
+               <Typography
+    fontSize={18}
+    color="#DDD"
+>
 
-                    {alarmMessage ||
+    {alarmMessage ||
 
-                    "Machine 1 Motor Frequency is below the safe operating limit."}
+    "Machine 1 Motor Frequency has dropped below 40 Hz. Immediate operator intervention is required."}
 
-                </Typography>
+</Typography>
 
                 <Box
                     sx={{
