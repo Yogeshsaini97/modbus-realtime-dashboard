@@ -99,7 +99,7 @@ useEffect(() => {
                             </Typography>
 
                             <Typography variant="h6">
-                                Servo Machine 01
+                               Pipe making machine
                             </Typography>
 
                         </Grid>
