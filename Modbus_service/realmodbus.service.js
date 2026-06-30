@@ -1,3 +1,58 @@
+const ModbusRTU = require("modbus-serial");
+const { emitModbusData } = require("./socket");
+
+const client = new ModbusRTU();
+
+let pollingTimer = null;
+
+const CONFIG = {
+
+    host: "192.168.3.250",
+
+    port: 502,
+
+    slaveId: 1,
+
+    pollingInterval: 1000
+
+};
+
+async function connectRealModbus() {
+
+    try {
+
+        console.log("\n=======================================");
+        console.log("Connecting Modbus TCP...");
+        console.log("=======================================\n");
+
+        await client.connectTCP(CONFIG.host, {
+
+            port: CONFIG.port
+
+        });
+
+        client.setID(CONFIG.slaveId);
+
+        console.log("✅ Connected Successfully");
+        console.log(`PLC Host : ${CONFIG.host}`);
+        console.log(`Port     : ${CONFIG.port}`);
+        console.log(`Slave ID : ${CONFIG.slaveId}`);
+
+        startPolling();
+
+    }
+
+    catch (error) {
+
+        console.log("❌ Connection Failed");
+        console.log(error.message);
+
+        reconnect();
+
+    }
+
+}
+
 async function pollMachineData() {
 
     try {
@@ -151,3 +206,53 @@ async function pollMachineData() {
     }
 
 }
+
+function startPolling() {
+
+    if (pollingTimer) {
+
+        clearInterval(pollingTimer);
+
+    }
+
+    pollingTimer = setInterval(() => {
+
+        pollMachineData();
+
+    }, CONFIG.pollingInterval);
+
+}
+
+function reconnect() {
+
+    if (pollingTimer) {
+
+        clearInterval(pollingTimer);
+
+        pollingTimer = null;
+
+    }
+
+    try {
+
+        client.close();
+
+    }
+
+    catch (err) {}
+
+    console.log("\nReconnecting in 5 seconds...\n");
+
+    setTimeout(() => {
+
+        connectRealModbus();
+
+    }, 5000);
+
+}
+
+module.exports = {
+
+    connectRealModbus
+
+};
