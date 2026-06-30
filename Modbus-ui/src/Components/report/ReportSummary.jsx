@@ -45,8 +45,8 @@ function ReportSummary() {
         },
 
         {
-            title: "Current RPM",
-            value: `${machineData.motorRPM} RPM`
+            title: "Current Frequency",
+            value: `${machineData.frequency} Hz`
         },
 
         {
@@ -64,7 +64,7 @@ function ReportSummary() {
             sx={{ mb: 3 }}
         >
 
-            {/* Motor Status Card */}
+            {/* Motor Status */}
 
             <Grid item xs={12} sm={6} md={3}>
 
@@ -86,20 +86,78 @@ function ReportSummary() {
                         variant="body2"
                         color="text.secondary"
                     >
+
                         Motor Status
+
                     </Typography>
 
                     <Chip
+
                         label={machineData.motorStatus}
+
                         color={
                             machineData.motorStatus === "ON"
                                 ? "success"
                                 : "error"
                         }
+
                         sx={{
                             mt: 2,
                             fontWeight: "bold"
                         }}
+
+                    />
+
+                </Paper>
+
+            </Grid>
+
+            {/* Frequency Alarm */}
+
+            <Grid item xs={12} sm={6} md={3}>
+
+                <Paper
+                    elevation={3}
+                    sx={{
+                        p: 2,
+                        borderRadius: 3,
+                        textAlign: "center",
+                        height: "100%",
+                        transition: ".3s",
+                        "&:hover": {
+                            transform: "translateY(-3px)"
+                        }
+                    }}
+                >
+
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                    >
+
+                        Alarm Status
+
+                    </Typography>
+
+                    <Chip
+
+                        label={
+                            machineData.alarm
+                                ? "LOW FREQUENCY"
+                                : "HEALTHY"
+                        }
+
+                        color={
+                            machineData.alarm
+                                ? "error"
+                                : "success"
+                        }
+
+                        sx={{
+                            mt: 2,
+                            fontWeight: "bold"
+                        }}
+
                     />
 
                 </Paper>
@@ -108,56 +166,60 @@ function ReportSummary() {
 
             {/* Remaining Cards */}
 
-            {cards.map((card) => (
+            {
 
-                <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={3}
-                    key={card.title}
-                >
+                cards.map((card) => (
 
-                    <Paper
-                        elevation={3}
-                        sx={{
-                            p: 2,
-                            borderRadius: 3,
-                            textAlign: "center",
-                            height: "100%",
-                            transition: ".3s",
-                            "&:hover": {
-                                transform: "translateY(-3px)"
-                            }
-                        }}
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={3}
+                        key={card.title}
                     >
 
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                        >
-
-                            {card.title}
-
-                        </Typography>
-
-                        <Typography
-                            variant="h6"
+                        <Paper
+                            elevation={3}
                             sx={{
-                                mt: 1,
-                                fontWeight: 700
+                                p: 2,
+                                borderRadius: 3,
+                                textAlign: "center",
+                                height: "100%",
+                                transition: ".3s",
+                                "&:hover": {
+                                    transform: "translateY(-3px)"
+                                }
                             }}
                         >
 
-                            {card.value}
+                            <Typography
+                                variant="body2"
+                                color="text.secondary"
+                            >
 
-                        </Typography>
+                                {card.title}
 
-                    </Paper>
+                            </Typography>
 
-                </Grid>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    mt: 1,
+                                    fontWeight: 700
+                                }}
+                            >
 
-            ))}
+                                {card.value}
+
+                            </Typography>
+
+                        </Paper>
+
+                    </Grid>
+
+                ))
+
+            }
 
         </Grid>
 

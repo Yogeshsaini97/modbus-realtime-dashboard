@@ -16,9 +16,11 @@ class PdfReportService {
 
         const doc = new jsPDF();
 
-        // ------------------------------------------------
-        // Header
-        // ------------------------------------------------
+        /*
+        ============================================
+        HEADER
+        ============================================
+        */
 
         doc.setFillColor(11, 17, 32);
 
@@ -28,15 +30,19 @@ class PdfReportService {
 
         doc.setFontSize(20);
 
-        doc.text("Widhin Imap™", 14, 12);
+        doc.text("MotorVision™", 14, 12);
 
         doc.setFontSize(10);
 
         doc.text("Industrial Monitoring Platform", 14, 20);
 
-        doc.text("Powered by Saini Enterprises", 140, 20);
+        doc.text("Powered by Saini Enterprises", 128, 20);
 
-        // ------------------------------------------------
+        /*
+        ============================================
+        TITLE
+        ============================================
+        */
 
         doc.setTextColor(0);
 
@@ -44,17 +50,15 @@ class PdfReportService {
 
         doc.text("Machine Operational Report", 14, 40);
 
-        // ------------------------------------------------
-        // Machine Information
-        // ------------------------------------------------
-
-        doc.setFontSize(12);
-
-        doc.text("Machine Information", 14, 52);
+        /*
+        ============================================
+        MACHINE INFORMATION
+        ============================================
+        */
 
         autoTable(doc, {
 
-            startY: 56,
+            startY: 48,
 
             theme: "grid",
 
@@ -62,23 +66,29 @@ class PdfReportService {
 
             body: [
 
-                ["Machine", "Pipe Cutting Machine 01"],
+                ["Machine Name", "Pipe Cutting Machine 01"],
 
                 ["Machine ID", "PCM-01"],
 
-                ["Generated On", dayjs().format("DD MMM YYYY hh:mm:ss A")],
+                ["Motor Company", "Siemens"],
+
+                ["Model", "SIMOTICS GP"],
 
                 ["Software Version", "v1.0.0"],
 
-                ["Status", machineData.motorStatus]
+                ["Generated On", dayjs().format("DD MMM YYYY hh:mm:ss A")],
+
+                ["Machine Status", machineData.motorStatus]
 
             ]
 
         });
 
-        // ------------------------------------------------
-        // Operational Summary
-        // ------------------------------------------------
+        /*
+        ============================================
+        PRODUCTION SUMMARY
+        ============================================
+        */
 
         autoTable(doc, {
 
@@ -86,23 +96,65 @@ class PdfReportService {
 
             theme: "grid",
 
-            head: [["Operational Summary", "Value"]],
+            head: [["Production Summary", "Value"]],
 
             body: [
 
-                ["Current Motor RPM", `${machineData.motorRPM} RPM`],
+                [
 
-                ["Current Pipe Length", `${machineData.pipeLength} mm`],
+                    "Current Frequency",
 
-                ["Runtime Today", `${runtime.todayRuntime} sec`],
+                    `${machineData.frequency} Hz`
 
-                ["Motor Starts", runtime.startCount],
-
-                ["Total Records", history.length],
+                ],
 
                 [
 
-                    "Total Length Cut",
+                    "Current Pipe Length",
+
+                    `${machineData.pipeLength} mm`
+
+                ],
+
+                [
+
+                    "Runtime Today",
+
+                    `${runtime.todayRuntime} sec`
+
+                ],
+
+                [
+
+                    "Motor Starts",
+
+                    runtime.startCount
+
+                ],
+
+                [
+
+                    "Alarm Status",
+
+                    machineData.alarm
+
+                        ? "LOW FREQUENCY"
+
+                        : "HEALTHY"
+
+                ],
+
+                [
+
+                    "Total Records",
+
+                    history.length
+
+                ],
+
+                [
+
+                    "Total Pipe Length Produced",
 
                     `${history.reduce(
 
@@ -118,9 +170,11 @@ class PdfReportService {
 
         });
 
-        // ------------------------------------------------
-        // History
-        // ------------------------------------------------
+        /*
+        ============================================
+        OPERATIONAL HISTORY
+        ============================================
+        */
 
         autoTable(doc, {
 
@@ -130,11 +184,13 @@ class PdfReportService {
 
                 "Time",
 
-                "Status",
+                "Motor Status",
 
-                "Motor RPM",
+                "Frequency",
 
-                "Pipe Length"
+                "Pipe Length",
+
+                "Alarm"
 
             ]],
 
@@ -148,9 +204,15 @@ class PdfReportService {
 
                 row.motorStatus,
 
-                `${row.motorRPM} RPM`,
+                `${row.frequency} Hz`,
 
-                `${row.pipeLength} mm`
+                `${row.pipeLength} mm`,
+
+                row.alarm
+
+                    ? "LOW"
+
+                    : "OK"
 
             ]),
 
@@ -162,11 +224,15 @@ class PdfReportService {
 
         });
 
-        // ------------------------------------------------
-        // Footer
-        // ------------------------------------------------
+        /*
+        ============================================
+        FOOTER
+        ============================================
+        */
 
-        const pageHeight = doc.internal.pageSize.height;
+        const pageHeight =
+
+            doc.internal.pageSize.height;
 
         doc.setDrawColor(180);
 
@@ -186,7 +252,7 @@ class PdfReportService {
 
         doc.text(
 
-            "Powered by Saini Enterprises",
+            "MotorVision™ Industrial Monitoring Platform",
 
             14,
 
@@ -196,9 +262,9 @@ class PdfReportService {
 
         doc.text(
 
-            "Widhin Imap™ Industrial Monitoring Platform",
+            "Powered by Saini Enterprises",
 
-            110,
+            135,
 
             pageHeight - 12
 
@@ -206,7 +272,11 @@ class PdfReportService {
 
         doc.save(
 
-            `Machine_Report_${dayjs().format("DD-MM-YYYY_HH-mm")}.pdf`
+            `Machine_Report_${dayjs().format(
+
+                "DD-MM-YYYY_HH-mm"
+
+            )}.pdf`
 
         );
 
