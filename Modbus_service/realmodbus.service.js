@@ -1,78 +1,152 @@
+const ModbusRTU = require("modbus-serial");
+const { emitModbusData } = require("./socket");
+
+const client = new ModbusRTU();
+
+let pollingTimer = null;
+
+const CONFIG = {
+
+    host: "192.168.3.250",
+
+    port: 502,
+
+    slaveId: 1,
+
+    pollingInterval: 1000
+
+};
+
+async function connectRealModbus() {
+
+    try {
+
+        console.log("\n=======================================");
+        console.log("Connecting Modbus TCP...");
+        console.log("=======================================\n");
+
+        await client.connectTCP(CONFIG.host, {
+
+            port: CONFIG.port
+
+        });
+
+        client.setID(CONFIG.slaveId);
+
+        console.log("✅ Connected Successfully");
+        console.log(`PLC Host : ${CONFIG.host}`);
+        console.log(`Port     : ${CONFIG.port}`);
+        console.log(`Slave ID : ${CONFIG.slaveId}`);
+
+        startPolling();
+
+    } catch (error) {
+
+        console.log("❌ Connection Failed");
+        console.log(error.message);
+
+        reconnect();
+
+    }
+
+}
+
 async function pollMachineData() {
 
     try {
 
         console.clear();
 
-        console.log("========================================");
-        console.log("Reading PLC Registers...");
-        console.log("========================================");
+        console.log("=======================================");
+        console.log("      PLC REGISTER SCANNER");
+        console.log("=======================================\n");
 
         /*
-        ----------------------------------------------------
-        Holding Registers
+        ======================================================
+        HOLDING REGISTERS
         40500 - 40520
-        ----------------------------------------------------
+        ======================================================
         */
 
-        const hr = await client.readHoldingRegisters(500, 21);
+        try {
 
-        console.log("\nHolding Registers (40500 - 40520)\n");
+            const hr = await client.readHoldingRegisters(500, 21);
 
-        hr.data.forEach((value, index) => {
+            console.log("📘 HOLDING REGISTERS");
 
-            console.log(
-                `40${500 + index} : ${value}`
-            );
+            console.log("---------------------------------------");
 
-        });
+            hr.data.forEach((value, index) => {
+
+                console.log(
+
+                    `40${500 + index}  =  ${value}`
+
+                );
+
+            });
+
+        } catch (err) {
+
+            console.log("Holding Registers Error");
+
+            console.log(err.message);
+
+        }
 
         /*
-        ----------------------------------------------------
-        Coils
+        ======================================================
+        COILS
         00001 - 00020
-        ----------------------------------------------------
+        ======================================================
         */
 
         try {
 
             const coils = await client.readCoils(0, 20);
 
-            console.log("\nCoils (00001 - 00020)\n");
+            console.log("\n📗 COILS");
+
+            console.log("---------------------------------------");
 
             coils.data.forEach((value, index) => {
 
                 console.log(
-                    `${index + 1} : ${value}`
+
+                    `${String(index + 1).padStart(5, "0")} = ${value}`
+
                 );
 
             });
 
         } catch (err) {
 
-            console.log("No Coil Data");
+            console.log("\nNo Coil Data");
 
         }
 
         /*
-        ----------------------------------------------------
-        Discrete Inputs
+        ======================================================
+        DISCRETE INPUTS
         10001 - 10020
-        ----------------------------------------------------
+        ======================================================
         */
 
         try {
 
-            const di =
+            const inputs =
+
                 await client.readDiscreteInputs(0, 20);
 
-            console.log("\nDiscrete Inputs (10001 - 10020)\n");
+            console.log("\n📙 DISCRETE INPUTS");
 
-            di.data.forEach((value, index) => {
+            console.log("---------------------------------------");
+
+            inputs.data.forEach((value, index) => {
 
                 console.log(
 
-                    `10${String(index + 1).padStart(3, "0")} : ${value}`
+                    `10${String(index + 1).padStart(3, "0")} = ${value}`
 
                 );
 
@@ -80,43 +154,50 @@ async function pollMachineData() {
 
         } catch (err) {
 
-            console.log("No Discrete Inputs");
+            console.log("\nNo Discrete Inputs");
 
         }
 
         /*
-        ----------------------------------------------------
-        Input Registers
+        ======================================================
+        INPUT REGISTERS
         30001 - 30020
-        ----------------------------------------------------
+        ======================================================
         */
 
         try {
 
             const ir =
+
                 await client.readInputRegisters(0, 20);
 
-            console.log("\nInput Registers (30001 - 30020)\n");
+            console.log("\n📕 INPUT REGISTERS");
+
+            console.log("---------------------------------------");
 
             ir.data.forEach((value, index) => {
 
                 console.log(
-                    `30${String(index + 1).padStart(3, "0")} : ${value}`
+
+                    `30${String(index + 1).padStart(3, "0")} = ${value}`
+
                 );
 
             });
 
         } catch (err) {
 
-            console.log("No Input Registers");
+            console.log("\nNo Input Registers");
 
         }
 
         /*
-        ----------------------------------------------------
-        Temporary Payload
-        ----------------------------------------------------
+        ======================================================
+        TEMPORARY PAYLOAD
+        ======================================================
         */
+
+        const hr = await client.readHoldingRegisters(500, 21);
 
         const payload = {
 
@@ -134,17 +215,17 @@ async function pollMachineData() {
 
         };
 
-        console.log("\nPayload\n");
+        console.log("\n=======================================");
+        console.log("CURRENT PAYLOAD");
+        console.log("=======================================\n");
 
         console.table(payload.registers);
 
         emitModbusData(payload);
 
-    }
+    } catch (error) {
 
-    catch (error) {
-
-        console.log("Polling Error");
+        console.log("\nPolling Error");
 
         console.log(error.message);
 
@@ -153,3 +234,51 @@ async function pollMachineData() {
     }
 
 }
+
+function startPolling() {
+
+    if (pollingTimer) {
+
+        clearInterval(pollingTimer);
+
+    }
+
+    pollingTimer = setInterval(() => {
+
+        pollMachineData();
+
+    }, CONFIG.pollingInterval);
+
+}
+
+function reconnect() {
+
+    if (pollingTimer) {
+
+        clearInterval(pollingTimer);
+
+        pollingTimer = null;
+
+    }
+
+    try {
+
+        client.close();
+
+    } catch (err) {}
+
+    console.log("\nReconnecting in 5 seconds...\n");
+
+    setTimeout(() => {
+
+        connectRealModbus();
+
+    }, 5000);
+
+}
+
+module.exports = {
+
+    connectRealModbus
+
+};
