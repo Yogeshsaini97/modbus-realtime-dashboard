@@ -153,18 +153,15 @@ class PdfReportService {
                 ],
 
                 [
+    "Total Pipe Length Produced",
 
-                    "Total Pipe Length Produced",
+    `${
+        history.length
+            ? history[history.length - 1].pipeLength
+            : 0
+    } mm`
 
-                    `${history.reduce(
-
-                        (sum, row) => sum + row.pipeLength,
-
-                        0
-
-                    )} mm`
-
-                ]
+]
 
             ]
 
