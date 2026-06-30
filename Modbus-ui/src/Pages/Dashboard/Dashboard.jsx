@@ -23,7 +23,7 @@ import StraightenIcon from "@mui/icons-material/Straighten";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import AccessTimeFilledIcon from "@mui/icons-material/AccessTimeFilled";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
-
+import {formatPipeLength, formatRuntime } from "../../helpers/helpers"
 import StatusWidget from "../../Components/dashboard/widgets/StatusWidget";
 import Header from "../../Components/Layout/Header/Header";
 import { useMachine } from "../../Context/MachineContext";
@@ -40,20 +40,19 @@ function Dashboard() {
     } = useMachine();
 
     const [alarmOpen, setAlarmOpen] = useState(false);
+    const [alarmAcknowledged, setAlarmAcknowledged] = useState(false);
 
 useEffect(() => {
 
-    if (machineData.alarm) {
+    if (!machineData.alarm) {
 
-        setAlarmOpen(true);
-
-    } else {
-
-        setAlarmOpen(false);
+        setAlarmAcknowledged(false);
 
     }
 
 }, [machineData.alarm]);
+
+
 
     return (
 
@@ -133,7 +132,7 @@ useEffect(() => {
 
                             <Typography variant="h6">
 
-                                {runtime?.todayRuntime || 0} sec
+                                {formatRuntime(runtime?.todayRuntime) || 0}
 
                             </Typography>
 
@@ -262,9 +261,9 @@ color={
                         <StatusWidget
                            title="PIPE LENGTH"
 
-value={machineData.pipeLength}
+value={formatPipeLength(machineData.pipeLength)}
 
-unit="mm"
+unit=""
 
 subtitle="Current Pipe"
                             color="#F59E0B"
@@ -282,9 +281,9 @@ subtitle="Current Pipe"
                         <StatusWidget
                             title="TODAY'S RUNTIME"
 
-value={runtime.todayRuntime || 0}
+value={formatRuntime(runtime.todayRuntime) || 0}
 
-unit="sec"
+unit=""
 
 subtitle="Today's Production"
 
@@ -565,7 +564,7 @@ Pipe Length
 
 <Typography fontWeight="bold">
 
-{machineData.pipeLength} mm
+{formatPipeLength(machineData.pipeLength)}
 
 </Typography>
 
@@ -712,15 +711,10 @@ color:"#22C55E"
 
             </Box>
 <AlarmDialog
-
-    open={alarmOpen}
-
+    open={machineData.alarm && !alarmAcknowledged}
     frequency={machineData.frequency}
-
     alarmMessage={machineData.alarmMessage}
-
-    onClose={()=>setAlarmOpen(false)}
-
+    onAcknowledge={() => setAlarmAcknowledged(true)}
 />
 
         </Box>

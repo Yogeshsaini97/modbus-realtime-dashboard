@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
+import { formatPipeLength } from "../helpers/helpers";
 
 class ReportService {
 
@@ -27,7 +28,7 @@ class ReportService {
 
             "Motor RPM": row.motorRPM,
 
-            "Pipe Length (mm)": row.pipeLength
+            "Pipe Length (m/min)": formatPipeLength(row.pipeLength)
 
         }));
 

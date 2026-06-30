@@ -8,6 +8,7 @@ import {
 import dayjs from "dayjs";
 
 import { useMachine } from "../../Context/MachineContext";
+import { formatPipeLength, formatRuntime } from "../../helpers/helpers";
 
 function ReportSummary() {
 
@@ -41,7 +42,7 @@ function ReportSummary() {
 
         {
             title: "Runtime Today",
-            value: `${runtime.todayRuntime || 0} sec`
+            value: `${formatRuntime(runtime?.todayRuntime)|| 0}`
         },
 
         {
@@ -51,7 +52,7 @@ function ReportSummary() {
 
         {
             title: "Current Pipe Length",
-            value: `${machineData.pipeLength} mm`
+            value: `${formatPipeLength(machineData.pipeLength)}`
         }
 
     ];

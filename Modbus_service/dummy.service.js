@@ -79,7 +79,7 @@ function generateDummyData() {
 
     alarm =
         motorStatus === "ON" &&
-        frequency < 50;
+        frequency < 40;
 
     return {
 
@@ -96,7 +96,7 @@ function generateDummyData() {
             alarm,
 
             alarmMessage: alarm
-                ? "Machine 1 Motor Frequency Below 50 Hz"
+                ? "Machine 1 Motor Frequency Below 40 Hz"
                 : ""
 
         }

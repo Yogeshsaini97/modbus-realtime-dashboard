@@ -12,6 +12,7 @@ import {
 import dayjs from "dayjs";
 
 import { useMachine } from "../../Context/MachineContext";
+import { formatPipeLength } from "../../helpers/helpers";
 
 function ReportTable() {
 
@@ -47,7 +48,7 @@ function ReportTable() {
                         </TableCell>
 
                         <TableCell align="center">
-                            <strong>Pipe Length</strong>
+                            <strong>Pipe Length (m/min)</strong>
                         </TableCell>
 
                     </TableRow>
@@ -103,7 +104,7 @@ function ReportTable() {
 
                                 <strong>
 
-                                    {row.pipeLength} mm
+                                    {formatPipeLength(row.pipeLength)}
 
                                 </strong>
 

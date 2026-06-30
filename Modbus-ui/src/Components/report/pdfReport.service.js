@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import dayjs from "dayjs";
+import { formatPipeLength, formatRuntime } from "../../helpers/helpers";
 
 class PdfReportService {
 
@@ -112,7 +113,7 @@ class PdfReportService {
 
                     "Current Pipe Length",
 
-                    `${machineData.pipeLength} mm`
+                    `${formatPipeLength(machineData.pipeLength)}`
 
                 ],
 
@@ -120,7 +121,7 @@ class PdfReportService {
 
                     "Runtime Today",
 
-                    `${runtime.todayRuntime} sec`
+                    `${formatRuntime(runtime?.todayRuntime)}`
 
                 ],
 
@@ -156,10 +157,10 @@ class PdfReportService {
     "Total Pipe Length Produced",
 
     `${
-        history.length
+       formatPipeLength( history.length
             ? history[history.length - 1].pipeLength
             : 0
-    } mm`
+                 ) } `
 
 ]
 

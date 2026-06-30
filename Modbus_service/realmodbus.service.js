@@ -183,7 +183,7 @@ async function pollMachineData() {
 
                     alarm
 
-                        ? "Machine 1 Motor Frequency Below 50 Hz"
+                        ? "Machine 1 Motor Frequency Below 40 Hz"
 
                         : ""
 

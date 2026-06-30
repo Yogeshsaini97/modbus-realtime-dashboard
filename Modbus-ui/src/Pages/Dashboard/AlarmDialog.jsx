@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import { useEffect, useRef, useState } from "react";
 
 function AlarmDialog({
 
@@ -17,10 +18,105 @@ function AlarmDialog({
 
     alarmMessage,
 
-    onClose
+    onAcknowledge
 
-}) {
+}){
 
+
+ 
+
+
+
+
+const audioContextRef = useRef(null);
+const oscillatorRef = useRef(null);
+
+const startBeep = () => {
+
+    if (!audioContextRef.current) {
+
+        audioContextRef.current =
+            new (window.AudioContext || window.webkitAudioContext)();
+
+    }
+
+    const ctx = audioContextRef.current;
+
+    if (ctx.state === "suspended") {
+
+        ctx.resume();
+
+    }
+
+    if (oscillatorRef.current) return;
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "square";      // Industrial sounding
+    oscillator.frequency.value = 1200;
+
+    gain.gain.value = 0.15;
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    oscillatorRef.current = oscillator;
+
+};
+
+const stopBeep = async () => {
+
+    if (oscillatorRef.current) {
+
+        try {
+
+            oscillatorRef.current.stop();
+
+        } catch (e) {}
+
+        oscillatorRef.current.disconnect();
+
+        oscillatorRef.current = null;
+
+    }
+
+    if (audioContextRef.current) {
+
+        try {
+
+            await audioContextRef.current.close();
+
+        } catch (e) {}
+
+        audioContextRef.current = null;
+
+    }
+
+};
+
+
+useEffect(() => {
+
+    if (open) {
+
+        startBeep();
+
+    } else {
+
+        stopBeep();
+
+    }
+
+    return () => {
+
+        stopBeep();
+
+    };
+
+}, [open]);
     return (
 
         <Dialog
@@ -169,7 +265,13 @@ function AlarmDialog({
 
                     }}
 
-                    onClick={onClose}
+     onClick={async () => {
+
+    await stopBeep();
+
+    onAcknowledge();
+
+}}
 
                 >
 
