@@ -27,6 +27,8 @@ import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturi
 import StatusWidget from "../../Components/dashboard/widgets/StatusWidget";
 import Header from "../../Components/Layout/Header/Header";
 import { useMachine } from "../../Context/MachineContext";
+import { AlarmDialog } from "./AlarmDialog";
+import { useEffect, useState } from "react";
 
 function Dashboard() {
 
@@ -36,6 +38,22 @@ function Dashboard() {
         runtime,
         events
     } = useMachine();
+
+    const [alarmOpen, setAlarmOpen] = useState(false);
+
+useEffect(() => {
+
+    if (machineData.alarm) {
+
+        setAlarmOpen(true);
+
+    } else {
+
+        setAlarmOpen(false);
+
+    }
+
+}, [machineData.alarm]);
 
     return (
 
@@ -213,13 +231,23 @@ color={
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
                         <StatusWidget
-                           title="MOTOR RPM"
+                           title="MOTOR FREQUENCY"
 
-value={machineData.motorRPM}
+value={machineData.frequency}
 
-unit="RPM"
-                            subtitle="Realtime"
-                            color="#2563EB"
+unit="Hz"
+
+subtitle={
+    machineData.alarm
+        ? "Low Frequency"
+        : "Realtime"
+}
+
+color={
+    machineData.alarm
+        ? "#EF4444"
+        : "#2563EB"
+}
                             icon={
                                 <SpeedIcon
                                     sx={{ fontSize: 42 }}
@@ -345,13 +373,17 @@ Industrial Servo System
 </Stack>
 
 <Chip
-
-icon={<VerifiedIcon/>}
-
-label="Healthy"
-
-color="success"
-
+    icon={<VerifiedIcon />}
+    label={
+        machineData.alarm
+            ? "Low Frequency Alarm"
+            : "Healthy"
+    }
+    color={
+        machineData.alarm
+            ? "error"
+            : "success"
+    }
 />
 
 </Box>
@@ -474,70 +506,111 @@ Live Machine Data
 
 <Stack spacing={1.5}>
 
-<Box display="flex" justifyContent="space-between">
+<Box
+display="flex"
+justifyContent="space-between"
+>
 
 <Typography color="gray">
-Current Speed
-</Typography>
 
-<Typography fontWeight="bold">
+Machine Status
 
-{machineData.speed} RPM
-
-</Typography>
-
-</Box>
-
-<Box display="flex" justifyContent="space-between">
-
-<Typography color="gray">
-Temperature
-</Typography>
-
-<Typography fontWeight="bold">
-
-{machineData.temperature} °C
-
-</Typography>
-
-</Box>
-
-<Box display="flex" justifyContent="space-between">
-
-<Typography color="gray">
-Current
-</Typography>
-
-<Typography fontWeight="bold">
-
-{machineData.current} A
-
-</Typography>
-
-</Box>
-
-<Box display="flex" justifyContent="space-between">
-
-<Typography color="gray">
-Power Status
 </Typography>
 
 <Chip
+
 size="small"
-label={machineData.power}
+
+label={machineData.motorStatus}
+
 color={
-machineData.power==="ON"
+machineData.motorStatus==="ON"
 ?"success"
 :"error"
 }
+
 />
 
 </Box>
 
-<Box display="flex" justifyContent="space-between">
+<Box
+display="flex"
+justifyContent="space-between"
+>
 
 <Typography color="gray">
+
+Motor Frequency
+
+</Typography>
+
+<Typography fontWeight="bold">
+
+{machineData.frequency} Hz
+
+</Typography>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Pipe Length
+
+</Typography>
+
+<Typography fontWeight="bold">
+
+{machineData.pipeLength} mm
+
+</Typography>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Alarm Status
+
+</Typography>
+
+<Chip
+
+size="small"
+
+label={
+machineData.alarm
+?"ACTIVE"
+:"HEALTHY"
+}
+
+color={
+machineData.alarm
+?"error"
+:"success"
+}
+
+/>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
 Events Today
+
 </Typography>
 
 <Typography fontWeight="bold">
@@ -612,7 +685,7 @@ color:"#22C55E"
                             >
                                 <SpeedIcon />
 
-                                &nbsp; Live Speed Trend
+                                &nbsp; Live Frequency Trend
                             </Typography>
 
                             <Divider sx={{ mb: 2 }} />
@@ -638,6 +711,17 @@ color:"#22C55E"
                 </Grid>
 
             </Box>
+<AlarmDialog
+
+    open={alarmOpen}
+
+    frequency={machineData.frequency}
+
+    alarmMessage={machineData.alarmMessage}
+
+    onClose={()=>setAlarmOpen(false)}
+
+/>
 
         </Box>
 

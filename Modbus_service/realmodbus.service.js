@@ -40,7 +40,9 @@ async function connectRealModbus() {
 
         startPolling();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.log("❌ Connection Failed");
         console.log(error.message);
@@ -55,149 +57,39 @@ async function pollMachineData() {
 
     try {
 
-        console.clear();
-
-        console.log("=======================================");
-        console.log("      PLC REGISTER SCANNER");
-        console.log("=======================================\n");
-
         /*
-        ======================================================
-        HOLDING REGISTERS
-        40500 - 40520
-        ======================================================
+        -----------------------------------------
+        Read Holding Registers
+        40500 - 40510
+        -----------------------------------------
         */
 
-        try {
-
-            const hr = await client.readHoldingRegisters(500, 21);
-
-            console.log("📘 HOLDING REGISTERS");
-
-            console.log("---------------------------------------");
-
-            hr.data.forEach((value, index) => {
-
-                console.log(
-
-                    `40${500 + index}  =  ${value}`
-
-                );
-
-            });
-
-        } catch (err) {
-
-            console.log("Holding Registers Error");
-
-            console.log(err.message);
-
-        }
+        const holdingRegisters =
+            await client.readHoldingRegisters(500, 11);
 
         /*
-        ======================================================
-        COILS
-        00001 - 00020
-        ======================================================
+        -----------------------------------------
+        Read Machine Status
+        Coil 00001
+        -----------------------------------------
         */
 
-        try {
+        const coils =
+            await client.readCoils(0, 1);
 
-            const coils = await client.readCoils(0, 20);
+        const machineStatus =
+            coils.data[0]
+                ? "ON"
+                : "OFF";
 
-            console.log("\n📗 COILS");
+        const frequency =
+            holdingRegisters.data[4];
 
-            console.log("---------------------------------------");
+        const pipeLength =
+            holdingRegisters.data[0];
 
-            coils.data.forEach((value, index) => {
-
-                console.log(
-
-                    `${String(index + 1).padStart(5, "0")} = ${value}`
-
-                );
-
-            });
-
-        } catch (err) {
-
-            console.log("\nNo Coil Data");
-
-        }
-
-        /*
-        ======================================================
-        DISCRETE INPUTS
-        10001 - 10020
-        ======================================================
-        */
-
-        try {
-
-            const inputs =
-
-                await client.readDiscreteInputs(0, 20);
-
-            console.log("\n📙 DISCRETE INPUTS");
-
-            console.log("---------------------------------------");
-
-            inputs.data.forEach((value, index) => {
-
-                console.log(
-
-                    `10${String(index + 1).padStart(3, "0")} = ${value}`
-
-                );
-
-            });
-
-        } catch (err) {
-
-            console.log("\nNo Discrete Inputs");
-
-        }
-
-        /*
-        ======================================================
-        INPUT REGISTERS
-        30001 - 30020
-        ======================================================
-        */
-
-        try {
-
-            const ir =
-
-                await client.readInputRegisters(0, 20);
-
-            console.log("\n📕 INPUT REGISTERS");
-
-            console.log("---------------------------------------");
-
-            ir.data.forEach((value, index) => {
-
-                console.log(
-
-                    `30${String(index + 1).padStart(3, "0")} = ${value}`
-
-                );
-
-            });
-
-        } catch (err) {
-
-            console.log("\nNo Input Registers");
-
-        }
-
-        /*
-        ======================================================
-        TEMPORARY PAYLOAD
-        ======================================================
-        */
-
-        const hr = await client.readHoldingRegisters(500, 21);
+        const alarm =
+            holdingRegisters.data[10] === 1;
 
         const payload = {
 
@@ -205,25 +97,59 @@ async function pollMachineData() {
 
             registers: {
 
-                motorStatus: "UNKNOWN",
+                motorStatus: machineStatus,
 
-                frequency: hr.data[1],
+                frequency,
 
-                pipeLength: hr.data[5]
+                pipeLength,
+
+                alarm,
+
+                alarmMessage:
+
+                    alarm
+
+                        ? "Machine 1 Motor Frequency Below 50 Hz"
+
+                        : ""
 
             }
 
         };
 
-        console.log("\n=======================================");
-        console.log("CURRENT PAYLOAD");
+        console.clear();
+
+        console.log("=======================================");
+        console.log(" LIVE MACHINE DATA");
         console.log("=======================================\n");
 
-        console.table(payload.registers);
+        console.table({
+
+            "Machine Status": machineStatus,
+
+            "Motor Frequency": `${frequency} Hz`,
+
+            "Pipe Length": `${pipeLength} mm`,
+
+            "Alarm": alarm ? "ACTIVE" : "HEALTHY"
+
+        });
+
+        if (alarm) {
+
+            console.log("\n🚨 LOW FREQUENCY ALARM");
+
+            console.log(
+                "Machine 1 frequency dropped below 50 Hz."
+            );
+
+        }
 
         emitModbusData(payload);
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.log("\nPolling Error");
 
@@ -265,7 +191,9 @@ function reconnect() {
 
         client.close();
 
-    } catch (err) {}
+    }
+
+    catch (err) {}
 
     console.log("\nReconnecting in 5 seconds...\n");
 

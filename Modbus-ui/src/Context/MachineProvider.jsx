@@ -25,9 +25,13 @@ function MachineProvider({ children }) {
 
                 motorStatus: "OFF",
 
-                motorRPM: 0,
+                frequency: 0,
 
                 pipeLength: 0,
+
+                alarm: false,
+
+                alarmMessage: "",
 
                 timestamp: null
 
@@ -75,19 +79,21 @@ function MachineProvider({ children }) {
 
                 motorStatus: payload.registers.motorStatus,
 
-                motorRPM: payload.registers.motorRPM,
+                frequency: payload.registers.frequency,
 
                 pipeLength: payload.registers.pipeLength,
+
+                alarm: payload.registers.alarm,
+
+                alarmMessage: payload.registers.alarmMessage,
 
                 timestamp: payload.timestamp
 
             };
 
-            // Previous Machine Status
-
             const previousStatus = machineData.motorStatus;
 
-            // Save Latest State
+            const previousAlarm = machineData.alarm;
 
             StorageService.save(
 
@@ -97,13 +103,9 @@ function MachineProvider({ children }) {
 
             );
 
-            // Save History
-
             const updatedHistory =
 
                 HistoryService.append(newState);
-
-            // Runtime
 
             const updatedRuntime =
 
@@ -113,23 +115,43 @@ function MachineProvider({ children }) {
 
                 );
 
-            // Events
-
             let updatedEvents = events;
 
-            if (
+            // Motor Events
 
-                previousStatus !== newState.motorStatus
-
-            ) {
+            if (previousStatus !== newState.motorStatus) {
 
                 updatedEvents = EventService.add(
 
                     newState.motorStatus === "ON"
 
-                        ? "Motor Started"
+                        ? "Machine Started"
 
-                        : "Motor Stopped"
+                        : "Machine Stopped"
+
+                );
+
+            }
+
+            // Alarm Trigger
+
+            if (!previousAlarm && newState.alarm) {
+
+                updatedEvents = EventService.add(
+
+                    "⚠ Low Frequency Alarm"
+
+                );
+
+            }
+
+            // Alarm Cleared
+
+            if (previousAlarm && !newState.alarm) {
+
+                updatedEvents = EventService.add(
+
+                    "✅ Frequency Back To Normal"
 
                 );
 

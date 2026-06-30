@@ -1,45 +1,74 @@
 const { emitModbusData } = require("./socket");
 
-// Register 10001
+// Machine Status
 let motorStatus = "ON";
 
-// Register 40501
-let motorRPM = 2500;
+// Frequency (Hz)
+let frequency = 52;
 
-// Register 40505
+// Pipe Length (mm)
 let pipeLength = 0;
+
+// Alarm
+let alarm = false;
+
+// Direction for smooth frequency movement
+let direction = -0.3;
 
 function generateDummyData() {
 
-    // Randomly stop the machine (about once every few minutes)
+    // Random machine OFF
     if (motorStatus === "ON" && Math.random() > 0.995) {
 
         motorStatus = "OFF";
-        motorRPM = 0;
+        frequency = 0;
 
     }
 
-    // Randomly restart the machine
-    if (motorStatus === "OFF" && Math.random() > 0.97) {
+    // Random machine ON
+    if (motorStatus === "OFF" && Math.random() > 0.98) {
 
         motorStatus = "ON";
-        motorRPM = 2500;
+        frequency = 52;
+        direction = -0.3;
 
     }
 
-    // Machine Running
     if (motorStatus === "ON") {
 
-        // RPM fluctuates naturally
-        motorRPM += Math.floor(Math.random() * 21) - 10;
+        /*
+        Smooth Frequency Movement
 
-        if (motorRPM < 2450) motorRPM = 2450;
-        if (motorRPM > 2550) motorRPM = 2550;
+        52
+        51.7
+        51.4
+        51.1
+        50.8
+        50.5
+        50.2
+        49.9  <-- Alarm
+        */
 
-        // Pipe length increases
-        pipeLength += Math.floor(Math.random() * 120) + 80;
+        frequency += direction;
 
-        // New pipe starts after reaching 6000 mm
+        if (frequency <= 47) {
+
+            direction = 0.4;
+
+        }
+
+        if (frequency >= 54) {
+
+            direction = -0.4;
+
+        }
+
+        frequency = Number(frequency.toFixed(1));
+
+        // Pipe Production
+
+        pipeLength += Math.floor(Math.random() * 70) + 50;
+
         if (pipeLength >= 6000) {
 
             pipeLength = 0;
@@ -47,6 +76,10 @@ function generateDummyData() {
         }
 
     }
+
+    alarm =
+        motorStatus === "ON" &&
+        frequency < 50;
 
     return {
 
@@ -56,9 +89,15 @@ function generateDummyData() {
 
             motorStatus,
 
-            motorRPM,
+            frequency,
 
-            pipeLength
+            pipeLength,
+
+            alarm,
+
+            alarmMessage: alarm
+                ? "Machine 1 Motor Frequency Below 50 Hz"
+                : ""
 
         }
 
