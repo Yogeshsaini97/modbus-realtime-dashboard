@@ -1,91 +1,121 @@
-const ModbusRTU = require("modbus-serial");
-const { emitModbusData } = require("./socket");
-
-const client = new ModbusRTU();
-
-let pollingTimer = null;
-
-const CONFIG = {
-
-    host: "192.168.3.250",
-
-    port: 502,
-
-    slaveId: 1,
-
-    pollingInterval: 1000
-
-};
-
-async function connectRealModbus() {
-
-    try {
-
-        console.log("================================");
-        console.log("Connecting Modbus TCP...");
-        console.log("================================");
-
-        await client.connectTCP(CONFIG.host, {
-
-            port: CONFIG.port
-
-        });
-
-        client.setID(CONFIG.slaveId);
-
-        console.log("✅ Connected Successfully");
-        console.log(`PLC : ${CONFIG.host}:${CONFIG.port}`);
-        console.log(`Slave ID : ${CONFIG.slaveId}`);
-
-        startPolling();
-
-    }
-
-    catch (error) {
-
-        console.log("❌ Connection Failed");
-        console.log(error.message);
-
-        reconnect();
-
-    }
-
-}
-
 async function pollMachineData() {
 
     try {
 
-        /*
-            Read Holding Registers
+        console.clear();
 
-            40500
-            40501 -> Motor RPM
-            40502
-            40503
-            40504
-            40505 -> Pipe Length
+        console.log("========================================");
+        console.log("Reading PLC Registers...");
+        console.log("========================================");
+
+        /*
+        ----------------------------------------------------
+        Holding Registers
+        40500 - 40520
+        ----------------------------------------------------
         */
 
-        const response =
-            await client.readHoldingRegisters(500, 6);
+        const hr = await client.readHoldingRegisters(500, 21);
 
-        const registers = response.data;
+        console.log("\nHolding Registers (40500 - 40520)\n");
+
+        hr.data.forEach((value, index) => {
+
+            console.log(
+                `40${500 + index} : ${value}`
+            );
+
+        });
 
         /*
-            TODO
+        ----------------------------------------------------
+        Coils
+        00001 - 00020
+        ----------------------------------------------------
+        */
 
-            Read Motor Status once
-            register 10001 is confirmed.
+        try {
 
-            Example:
+            const coils = await client.readCoils(0, 20);
 
-            const di = await client.readDiscreteInputs(0,1);
+            console.log("\nCoils (00001 - 00020)\n");
 
-            const motorStatus =
-                di.data[0]
-                ? "ON"
-                : "OFF";
+            coils.data.forEach((value, index) => {
+
+                console.log(
+                    `${index + 1} : ${value}`
+                );
+
+            });
+
+        } catch (err) {
+
+            console.log("No Coil Data");
+
+        }
+
+        /*
+        ----------------------------------------------------
+        Discrete Inputs
+        10001 - 10020
+        ----------------------------------------------------
+        */
+
+        try {
+
+            const di =
+                await client.readDiscreteInputs(0, 20);
+
+            console.log("\nDiscrete Inputs (10001 - 10020)\n");
+
+            di.data.forEach((value, index) => {
+
+                console.log(
+
+                    `10${String(index + 1).padStart(3, "0")} : ${value}`
+
+                );
+
+            });
+
+        } catch (err) {
+
+            console.log("No Discrete Inputs");
+
+        }
+
+        /*
+        ----------------------------------------------------
+        Input Registers
+        30001 - 30020
+        ----------------------------------------------------
+        */
+
+        try {
+
+            const ir =
+                await client.readInputRegisters(0, 20);
+
+            console.log("\nInput Registers (30001 - 30020)\n");
+
+            ir.data.forEach((value, index) => {
+
+                console.log(
+                    `30${String(index + 1).padStart(3, "0")} : ${value}`
+                );
+
+            });
+
+        } catch (err) {
+
+            console.log("No Input Registers");
+
+        }
+
+        /*
+        ----------------------------------------------------
+        Temporary Payload
+        ----------------------------------------------------
         */
 
         const payload = {
@@ -96,15 +126,15 @@ async function pollMachineData() {
 
                 motorStatus: "UNKNOWN",
 
-                motorRPM: registers[1],
+                frequency: hr.data[1],
 
-                pipeLength: registers[5]
+                pipeLength: hr.data[5]
 
             }
 
         };
 
-        console.clear();
+        console.log("\nPayload\n");
 
         console.table(payload.registers);
 
@@ -123,53 +153,3 @@ async function pollMachineData() {
     }
 
 }
-
-function startPolling() {
-
-    if (pollingTimer) {
-
-        clearInterval(pollingTimer);
-
-    }
-
-    pollingTimer = setInterval(() => {
-
-        pollMachineData();
-
-    }, CONFIG.pollingInterval);
-
-}
-
-function reconnect() {
-
-    if (pollingTimer) {
-
-        clearInterval(pollingTimer);
-
-        pollingTimer = null;
-
-    }
-
-    try {
-
-        client.close();
-
-    }
-
-    catch (err) {}
-
-    console.log("Reconnecting in 5 seconds...");
-
-    setTimeout(() => {
-
-        connectRealModbus();
-
-    }, 5000);
-
-}
-
-module.exports = {
-
-    connectRealModbus
-
-};
