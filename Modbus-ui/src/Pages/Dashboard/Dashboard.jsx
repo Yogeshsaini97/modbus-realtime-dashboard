@@ -141,7 +141,7 @@ useEffect(() => {
                         <Grid item xs={12} md={3}>
 
                             <Typography color="gray">
-                                Starts Today
+                                Motor Restarted Count
                             </Typography>
 
                             <Typography variant="h6">
@@ -354,7 +354,7 @@ variant="h6"
 fontWeight="bold"
 >
 
-Servo Machine 01
+Servo Drive
 
 </Typography>
 
@@ -398,7 +398,7 @@ Motor Company
 </Typography>
 
 <Typography fontWeight="bold">
-Siemens
+N/A
 </Typography>
 
 </Grid>
@@ -410,7 +410,7 @@ Model
 </Typography>
 
 <Typography fontWeight="bold">
-SIMOTICS GP
+N/A
 </Typography>
 
 </Grid>

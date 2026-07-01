@@ -100,35 +100,7 @@ function MachineReportDialog({ open, onClose }) {
 
                     </Button>
 
-                    <Button
-
-                        variant="contained"
-
-                        color="error"
-
-                        startIcon={<PictureAsPdfIcon />}
-
-                        onClick={()=>
-
-                            pdfReportService.downloadPDF({
-
-                                machineData,
-
-                                history,
-
-                                runtime,
-
-                                events
-
-                            })
-
-                        }
-
-                    >
-
-                        Download PDF
-
-                    </Button>
+                    
 
                 </Stack>
 

@@ -71,13 +71,13 @@ class PdfReportService {
 
                 ["Machine ID", "PCM-01"],
 
-                ["Motor Company", "Siemens"],
+                ["Motor Company", "N/A"],
 
-                ["Model", "SIMOTICS GP"],
+                ["Model", "N/A"],
 
                 ["Software Version", "v1.0.0"],
 
-                ["Generated On", dayjs().format("DD MMM YYYY hh:mm:ss A")],
+                ["Report Generated On ", dayjs().format("DD MMM YYYY hh:mm:ss A")],
 
                 ["Machine Status", machineData.motorStatus]
 
@@ -103,7 +103,7 @@ class PdfReportService {
 
                 [
 
-                    "Current Frequency",
+                    "current motor frequency(rpm)",
 
                     `${machineData.frequency} Hz`
 
@@ -111,7 +111,7 @@ class PdfReportService {
 
                 [
 
-                    "Current Pipe Length",
+                    "TotalPipe Length produced till now",
 
                     `${formatPipeLength(machineData.pipeLength)}`
 
@@ -127,7 +127,7 @@ class PdfReportService {
 
                 [
 
-                    "Motor Starts",
+                    "Motor Restart Counts",
 
                     runtime.startCount
 
@@ -147,7 +147,7 @@ class PdfReportService {
 
                 [
 
-                    "Total Records",
+                    "Total Records Saved",
 
                     history.length
 

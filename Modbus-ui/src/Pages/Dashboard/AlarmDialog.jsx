@@ -218,7 +218,7 @@ useEffect(() => {
                         color="gray"
                     >
 
-                        Current Frequency
+                        current motor frequency(rpm)
 
                     </Typography>
 

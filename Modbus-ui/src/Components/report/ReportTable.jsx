@@ -57,7 +57,7 @@ function ReportTable() {
 
                 <TableBody>
 
-                    {history.map((row) => (
+                    {[...history].reverse().map((row) => (
                        
                         <TableRow
                             hover

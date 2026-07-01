@@ -21,22 +21,19 @@ function ReportSummary() {
     const cards = [
 
         {
-            title: "Report Date",
+            title: "Today's Date",
             value: dayjs().format("DD MMM YYYY")
         },
 
-        {
-            title: "Generated At",
-            value: dayjs().format("hh:mm:ss A")
-        },
+       
 
         {
-            title: "Total Records",
+            title: "Total Records Saved",
             value: history.length
         },
 
         {
-            title: "Motor Starts",
+            title: "Motor Restart Counts",
             value: runtime.startCount || 0
         },
 
@@ -46,12 +43,12 @@ function ReportSummary() {
         },
 
         {
-            title: "Current Frequency",
+            title: "current motor frequency(rpm)",
             value: `${machineData.frequency} Hz`
         },
 
         {
-            title: "Current Pipe Length",
+            title: "TotalPipe Length produced till now",
             value: `${formatPipeLength(machineData.pipeLength)}`
         }
 

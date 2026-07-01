@@ -16,7 +16,7 @@ class ReportService {
 
         }
 
-        const excelData = history.map((row, index) => ({
+        const excelData =[...history].reverse().map((row, index) => ({
 
             "Sr No": index + 1,
 
