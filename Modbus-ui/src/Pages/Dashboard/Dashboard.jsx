@@ -29,6 +29,7 @@ import Header from "../../Components/Layout/Header/Header";
 import { useMachine } from "../../Context/MachineContext";
 import { AlarmDialog } from "./AlarmDialog";
 import { useEffect, useState } from "react";
+import { getRemainingShiftTime } from "../../helpers/timeRemaining";
 
 function Dashboard() {
 
@@ -53,6 +54,21 @@ useEffect(() => {
 }, [machineData.alarm]);
 
 
+const [remainingTime, setRemainingTime] = useState("");
+
+useEffect(() => {
+
+    setRemainingTime(getRemainingShiftTime());
+
+    const timer = setInterval(() => {
+
+        setRemainingTime(getRemainingShiftTime());
+
+    }, 1000);
+
+    return () => clearInterval(timer);
+
+}, []);
 
     return (
 
@@ -153,8 +169,34 @@ useEffect(() => {
                         </Grid>
 
                     </Grid>
+                                        <Paper
+    elevation={3}
+    sx={{
+        p: 2,
+        textAlign: "center",
+        borderRadius: 3
+    }}
+>
+
+    <Typography
+        variant="subtitle2"
+        color="text.secondary"
+    >
+        Shift Ends In
+    </Typography>
+
+    <Typography
+        variant="h5"
+        fontWeight="bold"
+        color="error"
+    >
+        {remainingTime}
+    </Typography>
+
+</Paper>
 
                     <div>
+    
                         <Box
 display="flex"
 justifyContent="space-between"
