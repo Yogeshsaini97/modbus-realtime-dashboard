@@ -94,7 +94,7 @@ function ReportTable() {
 
                                 <strong>
 
-                                    {row.motorRPM} RPM
+                                    {row.frequency} RPM
 
                                 </strong>
 
