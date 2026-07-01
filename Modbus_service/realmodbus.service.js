@@ -7,10 +7,25 @@ let pollingTimer = null;
 
 const CONFIG = {
 
-    host: "192.168.3.250",
+    // CONNECTION TYPE
+    connectionType: "TCP", // "TCP" or "RTU"
 
-    port: 502,
+    // TCP SETTINGS
+    tcp: {
+        host: "192.168.3.250",
+        port: 502
+    },
 
+    // SERIAL SETTINGS
+    serial: {
+        port: "COM2",
+        baudRate: 9600,
+        dataBits: 8,
+        parity: "none",
+        stopBits: 1
+    },
+
+    // COMMON
     slaveId: 1,
 
     pollingInterval: 1000
@@ -21,21 +36,66 @@ async function connectRealModbus() {
 
     try {
 
-        console.log("\n=======================================");
-        console.log("Connecting Modbus TCP...");
-        console.log("=======================================\n");
+        console.log("================================");
+        console.log("Connecting PLC...");
+        console.log("================================");
 
-        await client.connectTCP(CONFIG.host, {
+        if (CONFIG.connectionType === "TCP") {
 
-            port: CONFIG.port
+            console.log("Connection Type : TCP/IP");
 
-        });
+            await client.connectTCP(
+
+                CONFIG.tcp.host,
+
+                {
+
+                    port: CONFIG.tcp.port
+
+                }
+
+            );
+
+        } else {
+
+            console.log("Connection Type : Serial (RTU)");
+
+            await client.connectRTUBuffered(
+
+                CONFIG.serial.port,
+
+                {
+
+                    baudRate: CONFIG.serial.baudRate,
+
+                    dataBits: CONFIG.serial.dataBits,
+
+                    parity: CONFIG.serial.parity,
+
+                    stopBits: CONFIG.serial.stopBits
+
+                }
+
+            );
+
+        }
 
         client.setID(CONFIG.slaveId);
 
-        console.log("✅ Connected Successfully");
-        console.log(`PLC Host : ${CONFIG.host}`);
-        console.log(`Port     : ${CONFIG.port}`);
+        console.log("✅ PLC Connected");
+
+        if (CONFIG.connectionType === "TCP") {
+
+            console.log(`Host     : ${CONFIG.tcp.host}`);
+            console.log(`Port     : ${CONFIG.tcp.port}`);
+
+        } else {
+
+            console.log(`COM Port : ${CONFIG.serial.port}`);
+            console.log(`BaudRate : ${CONFIG.serial.baudRate}`);
+
+        }
+
         console.log(`Slave ID : ${CONFIG.slaveId}`);
 
         startPolling();
@@ -45,6 +105,7 @@ async function connectRealModbus() {
     catch (error) {
 
         console.log("❌ Connection Failed");
+
         console.log(error.message);
 
         reconnect();
