@@ -58,12 +58,12 @@ function ReportTable() {
                 <TableBody>
 
                     {history.map((row) => (
-
+                       
                         <TableRow
                             hover
                             key={row.timestamp}
                         >
-
+ {console.log("row",row)}
                             <TableCell>
 
                                 {dayjs(row.timestamp).format(
