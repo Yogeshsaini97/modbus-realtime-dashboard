@@ -3,6 +3,20 @@ const { emitModbusData } = require("./socket");
 
 const client = new ModbusRTU();
 
+/*
+-----------------------------------------
+Production Tracking
+-----------------------------------------
+*/
+
+let previousPipeLength = 0;
+
+let totalPipeLength = 0;
+
+let pipeLengthOffset = 0;
+
+let resetRequested = false;
+
 let pollingTimer = null;
 
 const CONFIG = {
@@ -146,11 +160,74 @@ async function pollMachineData() {
         const frequency =
             holdingRegisters.data[4];
 
-        const pipeLength =
-            holdingRegisters.data[0];
+       const pipeLength =
+    holdingRegisters.data[0];
 
-        const alarm =
-            holdingRegisters.data[10] === 1;
+    if (resetRequested) {
+
+    pipeLengthOffset = pipeLength;
+
+    previousPipeLength = 0;
+
+    totalPipeLength = 0;
+
+    resetRequested = false;
+
+    console.log("\n====================================");
+
+    console.log("NEW PRODUCTION STARTED");
+
+    console.log("Baseline :", pipeLengthOffset);
+
+    console.log("====================================\n");
+
+}
+
+pipeLength = Math.max(
+
+    0,
+
+    pipeLength - pipeLengthOffset
+
+);
+
+/*
+-----------------------------------------
+Pipe Production Tracking
+-----------------------------------------
+*/
+
+/*
+-----------------------------------------
+TOTAL PRODUCTION
+-----------------------------------------
+*/
+
+// First reading
+if (previousPipeLength === 0) {
+
+    previousPipeLength = pipeLength;
+
+}
+
+// Pipe increased
+if (pipeLength > previousPipeLength) {
+
+    totalPipeLength += (pipeLength - previousPipeLength);
+
+}
+
+// Pipe reset to zero (new pipe)
+if (pipeLength < previousPipeLength) {
+
+    totalPipeLength += pipeLength;
+
+}
+
+previousPipeLength = pipeLength;
+
+const alarm =
+    holdingRegisters.data[10] === 1;
 
         /*
         -----------------------------------------
@@ -198,18 +275,19 @@ async function pollMachineData() {
 
         console.table({
 
-            "Machine Status": machineStatus,
+    "Machine Status": machineStatus,
 
-            "Frequency (Hz)": frequency,
+    "Frequency (Hz)": frequency,
 
-            "Pipe Length (mm)": pipeLength,
+    "Current Pipe (mm)": pipeLength,
 
-            "Alarm Register": holdingRegisters.data[10],
+    "Total Produced (mm)": totalPipeLength + pipeLength,
 
-            "Alarm Status": alarm
+    "Alarm Register": holdingRegisters.data[10],
 
-        });
+    "Alarm Status": alarm
 
+});
         if (alarm) {
 
             console.log("\n🚨 LOW FREQUENCY ALARM ACTIVE");
@@ -230,25 +308,27 @@ async function pollMachineData() {
 
             timestamp: Date.now(),
 
-            registers: {
+           registers: {
 
-                motorStatus: machineStatus,
+    motorStatus: machineStatus,
 
-                frequency,
+    frequency,
 
-                pipeLength,
+    pipeLength,
 
-                alarm,
+    totalPipeLength: totalPipeLength + pipeLength,
 
-                alarmMessage:
+    alarm,
 
-                    alarm
+    alarmMessage:
 
-                        ? "Machine 1 Motor Frequency Below 40 Hz"
+        alarm
 
-                        : ""
+            ? "Machine 1 Motor Frequency Below 40 Hz"
 
-            }
+            : ""
+
+}
 
         };
 
@@ -312,8 +392,28 @@ function reconnect() {
 
 }
 
+function resetProductionReal() {
+
+    console.log("\n====================================");
+
+    console.log("SYSTEM RESET REQUEST RECEIVED");
+
+    console.log("====================================");
+
+    previousPipeLength = 0;
+
+    totalPipeLength = 0;
+
+    resetRequested = true;
+
+    console.log("Waiting for next PLC reading...");
+
+}
+
 module.exports = {
 
-    connectRealModbus
+    connectRealModbus,
+
+    resetProductionReal
 
 };

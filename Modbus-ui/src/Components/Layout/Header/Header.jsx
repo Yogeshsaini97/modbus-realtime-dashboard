@@ -79,7 +79,7 @@ function Header() {
     onClick={() => setOpenReport(true)}
     sx={{  marginInline:"12px"}}
 >
-    View & download operational history
+    View operational history
 </Button>
 <Button
  sx={{  marginInline:"12px"}}

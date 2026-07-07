@@ -2,10 +2,15 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import dayjs from "dayjs";
 import { formatPipeLength, formatRuntime } from "../../helpers/helpers";
+import operatorService from "../../services/operator.service";
+
 
 class PdfReportService {
+   
 
     download(machineData, history, runtime) {
+
+         const operatorName = operatorService.get();
 
         if (!history.length) {
 
@@ -67,21 +72,23 @@ class PdfReportService {
 
             body: [
 
-                ["Machine Name", "Pipe Cutting Machine 01"],
+    ["Machine Name", "Pipe Cutting Machine 01"],
 
-                ["Machine ID", "PCM-01"],
+    ["Machine ID", "PCM-01"],
 
-                ["Motor Company", "N/A"],
+    ["Operator Name", operatorName],
 
-                ["Model", "N/A"],
+    ["Motor Company", "N/A"],
 
-                ["Software Version", "v1.0.0"],
+    ["Model", "N/A"],
 
-                ["Report Generated On ", dayjs().format("DD MMM YYYY hh:mm:ss A")],
+    ["Software Version", "v1.0.0"],
 
-                ["Machine Status", machineData.motorStatus]
+    ["Report Generated On", dayjs().format("DD MMM YYYY hh:mm:ss A")],
 
-            ]
+    ["Machine Status", machineData.motorStatus]
+
+]
 
         });
 
@@ -103,7 +110,7 @@ class PdfReportService {
 
                 [
 
-                    "current motor frequency(rpm)",
+                    "current motor frequency(HZ)",
 
                     `${machineData.frequency} Hz`
 
@@ -111,9 +118,9 @@ class PdfReportService {
 
                 [
 
-                    "TotalPipe Length produced till now",
+                    "TotalPipe Length produced",
 
-                    `${formatPipeLength(machineData.pipeLength)}`
+                    `${formatPipeLength(machineData.totalPipeLength)}`
 
                 ],
 
@@ -127,7 +134,7 @@ class PdfReportService {
 
                 [
 
-                    "Motor Restart Counts",
+                    "Machine Start Count",
 
                     runtime.startCount
 
@@ -182,11 +189,11 @@ class PdfReportService {
 
                 "Time",
 
-                "Motor Status",
+                "Motor Status Recorded",
 
-                "Frequency",
+                "Frequency Recorded",
 
-                "Pipe Length",
+                "Total Pipe Length",
 
                 "Alarm"
 
@@ -204,7 +211,7 @@ class PdfReportService {
 
                 `${row.frequency} Hz`,
 
-                `${row.pipeLength} mm`,
+                `${formatPipeLength(row.totalPipeLength)}`,
 
                 row.alarm
 
@@ -268,15 +275,19 @@ class PdfReportService {
 
         );
 
-        doc.save(
+       const safeOperator = operatorName
+    .replace(/\s+/g, "_")
+    .replace(/[^\w]/g, "");
 
-            `Machine_Report_${dayjs().format(
+doc.save(
 
-                "DD-MM-YYYY_HH-mm"
+    `${safeOperator}_${dayjs().format(
 
-            )}.pdf`
+        "DD-MM-YYYY_HH-mm"
 
-        );
+    )}_Report.pdf`
+
+);
 
     }
 

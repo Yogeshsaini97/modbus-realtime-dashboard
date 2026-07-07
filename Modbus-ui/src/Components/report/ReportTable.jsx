@@ -40,15 +40,15 @@ function ReportTable() {
                         </TableCell>
 
                         <TableCell align="center">
-                            <strong>Motor Status</strong>
+                            <strong>Motor Status Recorded</strong>
                         </TableCell>
 
                         <TableCell align="center">
-                            <strong>Motor RPM</strong>
+                            <strong>Motor RPM Recorded</strong>
                         </TableCell>
 
                         <TableCell align="center">
-                            <strong>Pipe Length (m/min)</strong>
+                            <strong>Total Pipe Length produced(metre)</strong>
                         </TableCell>
 
                     </TableRow>
@@ -104,7 +104,7 @@ function ReportTable() {
 
                                 <strong>
 
-                                    {formatPipeLength(row.pipeLength)}
+                                    {formatPipeLength(row.totalPipeLength || 0)}
 
                                 </strong>
 

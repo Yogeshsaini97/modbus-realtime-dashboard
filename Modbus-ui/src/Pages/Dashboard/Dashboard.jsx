@@ -3,14 +3,18 @@
 import {
     Avatar,
     Box,
+    Button,
     Chip,
     Divider,
     Grid,
     Paper,
     Stack,
+    TextField,
     Typography
 } from "@mui/material";
+import dayjs from "dayjs";
 
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 import VerifiedIcon from "@mui/icons-material/Verified";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
@@ -29,19 +33,214 @@ import Header from "../../Components/Layout/Header/Header";
 import { useMachine } from "../../Context/MachineContext";
 import { AlarmDialog } from "./AlarmDialog";
 import { useEffect, useState } from "react";
+import ScheduleResetDialog from "../../Components/ScheduleResetDialog/ScheduleResetDialog";
+
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import resetSchedulerService from "../../services/resetScheduler.service";
+import operatorService from "../../services/operator.service";
 
 function Dashboard() {
 
-    const {
-        machineData,
-        connected,
-        runtime,
-        events
-    } = useMachine();
+   const {
+
+    machineData,
+    connected,
+    runtime,
+    events,
+    resetSystem
+
+} = useMachine();
 
     const [alarmOpen, setAlarmOpen] = useState(false);
     const [alarmAcknowledged, setAlarmAcknowledged] = useState(false);
+    const [openScheduleDialog, setOpenScheduleDialog] = useState(false);
+   const [timeLeft, setTimeLeft] = useState("No Reset Scheduled");
+   const [resetExecuted, setResetExecuted] = useState(false);
+const [isScheduleActive, setIsScheduleActive] = useState(false);
+const [operatorName, setOperatorName] = useState(
+    operatorService.get()
+);
 
+const [operatorInput, setOperatorInput] = useState("");
+const [editingOperator, setEditingOperator] = useState(
+    operatorName === "Unassigned"
+);
+
+const saveOperator = () => {
+
+    const name = operatorInput.trim() || "Unassigned";
+
+    operatorService.save(name);
+
+    setOperatorName(name);
+
+    setOperatorInput("");
+
+    setEditingOperator(false);
+
+};
+   useEffect(() => {
+
+    const updateCountdown = () => {
+
+        console.log("====================================");
+        console.log("CHECKING SCHEDULE...");
+        console.log("====================================");
+
+        const schedule = resetSchedulerService.get();
+
+        console.log("Schedule :", schedule);
+
+        if (!schedule || !schedule.enabled) {
+
+            console.log("❌ No Reset Scheduled");
+
+            setTimeLeft("No Reset Scheduled");
+
+            return;
+
+        }
+
+        const resetTime = dayjs(schedule.resetAt);
+
+        const now = dayjs();
+
+        console.log("Current Time :", now.format("DD MMM YYYY hh:mm:ss A"));
+
+        console.log("Reset Time   :", resetTime.format("DD MMM YYYY hh:mm:ss A"));
+
+        console.log("Is Valid Date :", resetTime.isValid());
+
+        const diff = resetTime.diff(now);
+
+        console.log("Difference (ms) :", diff);
+
+if (diff <= 0 && !resetExecuted) {
+
+    setResetExecuted(true);
+
+    console.log("Executing Scheduled Reset");
+
+    if (schedule.mode === "once") {
+
+        resetSchedulerService.clear();
+
+        setTimeLeft("No Reset Scheduled");
+
+    } else {
+
+        const tomorrow = dayjs(schedule.resetAt)
+            .add(1, "day")
+            .format("YYYY-MM-DD HH:mm:ss");
+
+        resetSchedulerService.save({
+
+            enabled: true,
+
+            mode: "daily",
+
+            resetAt: tomorrow
+
+        });
+
+        console.log("Next Reset :", tomorrow);
+
+    }
+
+    resetSystem();
+
+    return;
+
+}
+
+if (diff > 60000 && resetExecuted) {
+
+    setResetExecuted(false);
+
+}
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+
+        const minutes = Math.floor(
+            (diff % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        const seconds = Math.floor(
+            (diff % (1000 * 60)) / 1000
+        );
+
+        console.log("Hours   :", hours);
+        console.log("Minutes :", minutes);
+        console.log("Seconds :", seconds);
+
+        const countdown =
+            `${hours} Hr ${minutes} Min ${seconds} Sec`;
+
+        console.log("Countdown :", countdown);
+
+        setTimeLeft(countdown);
+
+        console.log("====================================");
+
+    };
+
+    updateCountdown();
+
+    const timer = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timer);
+
+}, []);
+useEffect(() => {
+
+    const syncOperator = () => {
+
+        const operator = operatorService.get();
+
+        setOperatorName(operator);
+
+        if (operator === "Unassigned") {
+
+            setOperatorInput("");
+
+            setEditingOperator(true);
+
+        }
+
+    };
+
+    syncOperator();
+
+    window.addEventListener("focus", syncOperator);
+
+    return () => {
+
+        window.removeEventListener("focus", syncOperator);
+
+    };
+
+}, []);
+
+useEffect(() => {
+
+    const checkSchedule = () => {
+
+        const schedule = resetSchedulerService.get();
+
+        setIsScheduleActive(
+
+            schedule?.enabled === true
+
+        );
+
+    };
+
+    checkSchedule();
+
+    const timer = setInterval(checkSchedule, 1000);
+
+    return () => clearInterval(timer);
+
+}, []);
 useEffect(() => {
 
     if (!machineData.alarm) {
@@ -100,6 +299,7 @@ useEffect(() => {
                             <Typography variant="h6">
                                Pipe making machine
                             </Typography>
+        
 
                         </Grid>
 
@@ -159,6 +359,7 @@ useEffect(() => {
 display="flex"
 justifyContent="space-between"
 alignItems="center"
+sx={{display:"flex",justifyContent:"flex-end",marginTop:"5px",marginBottom:"10px"}}
 >
 
 <Stack
@@ -182,6 +383,7 @@ Powered by
 
 </Typography>
 
+
 </Stack>
 
 <MemoryIcon
@@ -191,6 +393,8 @@ color:"#22C55E"
 />
 
 </Box>
+
+
                     </div>
 
                 </Paper>
@@ -255,17 +459,17 @@ color={
                         />
 
                     </Grid>
-
+{/* 
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
                         <StatusWidget
-                           title="PIPE LENGTH"
+                           title="Live PIPE LENGTH"
 
 value={formatPipeLength(machineData.pipeLength)}
 
 unit=""
 
-subtitle="Current Pipe"
+subtitle="Current Pipe produced per minute"
                             color="#F59E0B"
                             icon={
                                 <StraightenIcon
@@ -274,7 +478,31 @@ subtitle="Current Pipe"
                             }
                         />
 
-                    </Grid>
+                    </Grid> */}
+
+                    <Grid sx={{ width: "250px" }} item xs={12} sm={6} md={6} lg={3} xl={3}>
+
+    <StatusWidget
+
+        title="TOTAL PRODUCED PIPE"
+
+        value={formatPipeLength(machineData.totalPipeLength || 0)}
+
+        unit=""
+
+        subtitle="Total Pipe length produced(Current Shift)"
+
+        color="#22C55E"
+
+        icon={
+            <PrecisionManufacturingIcon
+                sx={{ fontSize: 42 }}
+            />
+        }
+
+    />
+
+</Grid>
 
                     <Grid  sx={{width:"250px"}} item xs={12} sm={6} md={6} lg={3} xl={3}>
 
@@ -347,7 +575,7 @@ height:52
 
 </Avatar>
 
-<Box>
+<Box > 
 
 <Typography
 variant="h6"
@@ -666,44 +894,406 @@ color:"#22C55E"
 </Grid>
  <Grid item xs={12} lg={8} sx={{width: "400px"}}>
 
-                        <Paper
-                            sx={{
-                              
-                                height: 320,
-                               p: 3,
-    background: "#1E293B",
-    borderRadius: 4,
-    border: "1px solid rgba(255,255,255,0.08)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.25)"
-                            }}
-                        >
-
-                            <Typography
-                                variant="h6"
-                                gutterBottom
-                            >
-                                <SpeedIcon />
-
-                                &nbsp; Live Frequency Trend
-                            </Typography>
-
-                            <Divider sx={{ mb: 2 }} />
-
-                           <Box
+                       <Box
     sx={{
-        height: "100%",
+        mt: 3,
+        mb: 3,
+        p: 2.5,
+        borderRadius: 3,
+        bgcolor: "#ffffff",
+        border: "1px solid #E5E7EB",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "space-between",
         alignItems: "center",
-        color: "gray"
+        gap: 3,
+        flexWrap: "wrap",
+        marginTop:"0px",
+        justifyContent:"center"
+        
     }}
 >
-    Live Speed Chart
-    <br />
-    Coming Soon
-</Box>
+<Paper
 
-                        </Paper>
+    elevation={0}
+    sx={{
+        p: 3,
+        mt: 3,
+        borderRadius: 3,
+        bgcolor: "#1E293B",
+        border: "1px solid rgba(255,255,255,.08)",
+        marginTop:"0px"
+    }}
+>
+
+    <Typography
+        variant="h6"
+        sx={{
+            color: "#fff",
+            fontWeight: 700,
+            mb: 2
+        }}
+    >
+        Current Shift Operator
+    </Typography>
+
+ {editingOperator ? (
+
+    <>
+        <TextField
+
+            fullWidth
+
+            placeholder="Enter current shift operator name"
+
+            value={operatorInput}
+
+            onChange={(e) => setOperatorInput(e.target.value)}
+
+            sx={{
+                mb: 2,
+                "& .MuiInputBase-root": {
+                 
+                }
+            }}
+
+        />
+
+        <Button
+
+            variant="contained"
+
+            onClick={saveOperator}
+
+        >
+
+            Save Operator Name
+
+        </Button>
+
+    </>
+
+) : (
+
+    <Paper
+
+        elevation={0}
+
+        sx={{
+            p: 2,
+           
+            borderRadius: 2,
+            border: "1px solid #E2E8F0",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+        }}
+
+    >
+
+        <Typography
+            fontWeight={600}
+        >
+
+            👤 {operatorName}
+
+        </Typography>
+
+        <Button
+
+            size="small"
+
+            variant="outlined"
+
+            onClick={() => {
+
+                setOperatorInput(operatorName);
+
+                setEditingOperator(true);
+
+            }}
+
+        >
+
+            Edit
+
+        </Button>
+
+    </Paper>
+
+)}
+
+
+    <Typography
+        sx={{
+            mt: 2,
+            color: "#fff",
+            fontWeight: 600
+        }}
+    >
+
+        👤 Current Operator :{" "}
+
+        <span style={{ color: "#4ADE80" }}>
+
+            {operatorName}
+
+        </span>
+
+    </Typography>
+
+</Paper>
+    {/* Left Buttons */}
+
+    <Stack
+        direction="row"
+        spacing={2}
+    >
+
+        <Button
+
+            variant="contained"
+
+            color="warning"
+
+            size="large"
+
+            startIcon={<RestartAltIcon />}
+
+            onClick={() => {
+
+               if (
+    window.confirm(
+        "⚠ Warning!\n\n" +
+        "Before resetting the system, please download and save the PDF report if you wish to keep your production data.\n\n" +
+        "This action will permanently clear the current production history, runtime, events, and production counters.\n\n" +
+        "This action cannot be undone.\n\n" +
+        "Are you sure you want to continue?"
+    )
+) {
+    resetSystem();
+}
+
+            }}
+
+            sx={{
+
+                px: 3,
+
+                py: 1.3,
+
+                fontWeight: 700,
+
+                borderRadius: 3,
+
+                textTransform: "none",
+
+                boxShadow: "0 6px 18px rgba(245,158,11,.35)",
+
+                "&:hover": {
+
+                    transform: "translateY(-2px)",
+
+                    boxShadow: "0 10px 24px rgba(245,158,11,.45)"
+
+                }
+
+            }}
+
+        >
+
+            Reset System now
+
+        </Button>
+
+        <Button
+
+    variant="contained"
+
+    color={isScheduleActive ? "error" : "primary"}
+
+    startIcon={<ScheduleIcon />}
+
+    onClick={() => {
+
+        if (isScheduleActive) {
+
+            if (
+
+                window.confirm(
+
+                    "Cancel the scheduled automatic reset?"
+
+                )
+
+            ) {
+
+                resetSchedulerService.clear();
+
+                setTimeLeft("No Reset Scheduled");
+
+                setIsScheduleActive(false);
+
+            }
+
+        } else {
+
+            setOpenScheduleDialog(true);
+
+        }
+
+    }}
+
+    sx={{
+
+        px: 3,
+
+        py: 1.3,
+
+        borderRadius: 3,
+
+        textTransform: "none",
+
+        fontWeight: 700,
+
+        boxShadow: isScheduleActive
+
+            ? "0 6px 18px rgba(239,68,68,.35)"
+
+            : "0 6px 18px rgba(37,99,235,.35)"
+
+    }}
+
+>
+
+    {isScheduleActive
+
+        ? "Cancel Schedule"
+
+        : "Schedule Reset"}
+
+</Button>
+    </Stack>
+
+    {/* Right Information */}
+
+    <Paper
+
+        elevation={0}
+
+        sx={{
+
+            px: 3,
+
+            py: 1.8,
+
+            borderRadius: 3,
+
+            bgcolor: "#F8FAFC",
+
+            border: "1px solid #E2E8F0",
+
+            minWidth: 360
+
+        }}
+
+    >
+
+        <Typography
+
+            variant="subtitle2"
+
+            sx={{
+
+                color: "#64748B",
+
+                fontWeight: 600,
+
+                mb: 1
+
+            }}
+
+        >
+
+            NEXT AUTOMATIC RESET AT :
+
+        </Typography>
+
+        <Typography
+
+            variant="h6"
+
+            sx={{
+
+                fontWeight: 700,
+
+                color: "#1E293B"
+
+            }}
+
+        >
+
+            {(() => {
+
+                const schedule = resetSchedulerService.get();
+
+                if (!schedule || !schedule.enabled) {
+
+                    return "Not Scheduled";
+
+                }
+
+                return dayjs(schedule.resetAt).format(
+
+                    "DD MMM YYYY • hh:mm A"
+
+                );
+
+            })()}
+
+        </Typography>
+
+        <Divider sx={{ my: 1.5 }} />
+
+        <Typography
+
+            sx={{
+
+                fontWeight: 600,
+
+                color: "#475569"
+
+            }}
+
+        >
+
+            Time Remaining
+
+        </Typography>
+
+        <Typography
+
+            variant="h5"
+
+            sx={{
+
+                fontWeight: 800,
+
+                color: "#2563EB",
+
+                letterSpacing: 1
+
+            }}
+
+        >
+
+            {timeLeft}
+
+        </Typography>
+
+    </Paper>
+
+</Box>
 
                     </Grid>
 
@@ -715,6 +1305,14 @@ color:"#22C55E"
     frequency={machineData.frequency}
     alarmMessage={machineData.alarmMessage}
     onAcknowledge={() => setAlarmAcknowledged(true)}
+/>
+
+<ScheduleResetDialog
+
+    open={openScheduleDialog}
+
+    onClose={() => setOpenScheduleDialog(false)}
+
 />
 
         </Box>

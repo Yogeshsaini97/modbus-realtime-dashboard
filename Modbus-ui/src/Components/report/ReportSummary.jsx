@@ -33,7 +33,7 @@ function ReportSummary() {
         },
 
         {
-            title: "Motor Restart Counts",
+            title: "Machine Start Count",
             value: runtime.startCount || 0
         },
 
@@ -43,13 +43,13 @@ function ReportSummary() {
         },
 
         {
-            title: "current motor frequency(rpm)",
+            title: "current motor frequency(HZ)",
             value: `${machineData.frequency} Hz`
         },
 
         {
-            title: "TotalPipe Length produced till now",
-            value: `${formatPipeLength(machineData.pipeLength)}`
+            title: "TotalPipe Length produced",
+            value: `${formatPipeLength(machineData.totalPipeLength )}`
         }
 
     ];

@@ -9,10 +9,10 @@ const { Server } = require("socket.io");
 const { initializeSocket } = require("./socket");
 
 // DUMMY DATA
-const { startDummyPolling } = require("./dummy.service");
+const { startDummyPolling, resetProductionDummy } = require("./dummy.service");
 
 // REAL MODBUS
-const { connectRealModbus } = require("./realmodbus.service");
+const { connectRealModbus, resetProduction, resetProductionReal } = require("./realmodbus.service");
 
 const app = express();
 
@@ -43,6 +43,19 @@ initializeSocket(io);
 io.on("connection", (socket) => {
 
   console.log("Frontend Connected");
+
+  socket.on("reset-system", () => {
+
+    console.log("\n====================================");
+    console.log("RESET REQUEST FROM DASHBOARD");
+    console.log("====================================");
+
+    // resetProductionReal();
+    resetProductionDummy();
+
+    socket.emit("system-reset-complete");
+
+});
 
   socket.on("disconnect", () => {
 

@@ -40,7 +40,7 @@ function MachineReportDialog({ open, onClose }) {
 
             <DialogTitle>
 
-                View & Download Operational History
+                View operational history
 
             </DialogTitle>
 
@@ -75,7 +75,7 @@ function MachineReportDialog({ open, onClose }) {
 
                 </Button>
 
-                <Stack
+                {/* <Stack
                     direction="row"
                     spacing={2}
                 >
@@ -102,7 +102,7 @@ function MachineReportDialog({ open, onClose }) {
 
                     
 
-                </Stack>
+                </Stack> */}
 
             </DialogActions>
 

@@ -79,6 +79,33 @@ class RuntimeService {
         );
 
     }
+    reset() {
+
+    const runtime = {
+
+        todayRuntime: 0,
+
+        startCount: 0,
+
+        lastStartTime: null,
+
+        motorRunning: false
+
+    };
+
+    StorageService.save(
+
+        APP_CONFIG.STORAGE_KEYS.MACHINE_RUNTIME,
+
+        runtime
+
+    );
+
+    console.log("✅ Runtime Reset");
+
+    return runtime;
+
+}
 
 }
 

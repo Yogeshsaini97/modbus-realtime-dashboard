@@ -10,6 +10,8 @@ import EventService from "../services/event.service";
 import { APP_CONFIG } from "../config/app.config";
 
 import socket from "../Socket/Socket";
+import pdfReportService from "../Components/report/pdfReport.service";
+import operatorService from "../services/operator.service";
 
 function MachineProvider({ children }) {
 
@@ -75,21 +77,23 @@ function MachineProvider({ children }) {
 
         socket.on("modbus-data", (payload) => {
 
-            const newState = {
+           const newState = {
 
-                motorStatus: payload.registers.motorStatus,
+    motorStatus: payload.registers.motorStatus,
 
-                frequency: payload.registers.frequency,
+    frequency: payload.registers.frequency,
 
-                pipeLength: payload.registers.pipeLength,
+    pipeLength: payload.registers.pipeLength,
 
-                alarm: payload.registers.alarm,
+    totalPipeLength: payload.registers.totalPipeLength,
 
-                alarmMessage: payload.registers.alarmMessage,
+    alarm: payload.registers.alarm,
 
-                timestamp: payload.timestamp
+    alarmMessage: payload.registers.alarmMessage,
 
-            };
+    timestamp: payload.timestamp
+
+};
 
             const previousStatus = machineData.motorStatus;
 
@@ -179,23 +183,91 @@ function MachineProvider({ children }) {
 
     }, [machineData, events]);
 
+
+const resetSystem = () => {
+  pdfReportService.download(
+
+            machineData,
+
+            history,
+
+            runtime
+
+        )
+    alert("reseting done")
+    console.log("======================================");
+    console.log("SYSTEM RESET");
+    console.log("======================================");
+
+    // Tell backend to reset production counters
+    socket.emit("reset-system");
+
+    // Clear History
+    HistoryService.clearHistory();
+
+    // Reset Runtime
+    const resetRuntime = RuntimeService.reset();
+
+    // Clear Events
+    EventService.clear();
+
+    // Remove Local Storage
+    StorageService.remove(
+        APP_CONFIG.STORAGE_KEYS.MACHINE_HISTORY
+    );
+
+    StorageService.remove(
+        APP_CONFIG.STORAGE_KEYS.MACHINE_RUNTIME
+    );
+
+    StorageService.remove(
+        APP_CONFIG.STORAGE_KEYS.MACHINE_EVENTS
+    );
+
+    // Update UI immediately
+    setHistory([]);
+
+    setRuntime(resetRuntime);
+
+    setEvents([]);
+// Reset Operator
+operatorService.save("Unassigned");
+
+setOperatorName("Unassigned");
+setOperatorInput("");
+setEditingOperator(true);
+    // DON'T turn the machine OFF.
+    // Keep live PLC values and only reset the production total.
+    setMachineData(prev => ({
+
+        ...prev,
+
+        totalPipeLength: 0
+
+    }));
+
+    console.log("✅ Dashboard Reset Completed");
+
+};
     return (
 
         <MachineContext.Provider
 
             value={{
 
-                connected,
+    connected,
 
-                machineData,
+    machineData,
 
-                runtime,
+    runtime,
 
-                history,
+    history,
 
-                events
+    events,
 
-            }}
+    resetSystem
+
+}}
 
         >
 

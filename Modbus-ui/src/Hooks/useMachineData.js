@@ -53,6 +53,12 @@ function useMachineData() {
 
         });
 
+        socket.on("system-reset-complete", () => {
+
+    console.log("✅ Backend Reset Successful");
+
+});
+
         return () => {
 
             socket.off("connect");
