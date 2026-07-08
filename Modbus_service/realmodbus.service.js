@@ -160,7 +160,7 @@ async function pollMachineData() {
         const frequency =
             holdingRegisters.data[4];
 
-       const pipeLength =
+       let pipeLength =
     holdingRegisters.data[0];
 
     if (resetRequested) {
