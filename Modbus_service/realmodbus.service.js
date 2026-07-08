@@ -142,6 +142,11 @@ async function pollMachineData() {
         const holdingRegisters =
             await client.readHoldingRegisters(500, 11);
 
+            const currentPipeRegister =
+    await client.readHoldingRegisters(120, 1);
+
+            
+
         /*
         -----------------------------------------
         Read Machine Status
@@ -161,7 +166,7 @@ async function pollMachineData() {
             holdingRegisters.data[4];
 
        let pipeLength =
-    holdingRegisters.data[0];
+    currentPipeRegister.data[0];
 
     if (resetRequested) {
 
