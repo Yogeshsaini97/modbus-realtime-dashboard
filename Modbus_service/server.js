@@ -73,12 +73,12 @@ server.listen(3000, async () => {
   // USE DUMMY DATA
   // =========================================
 
-  startDummyPolling();
+  // startDummyPolling();
 
   // =========================================
   // USE REAL MODBUS
   // =========================================
 
-//   await connectRealModbus();
+  await connectRealModbus();
 
 });
