@@ -320,6 +320,8 @@ function resetProductionReal() {
     console.log("====================================");
 
     totalPipeLength = 0;
+     // Immediately send latest values
+    pollMachineData();
 
     console.log("✅ Total Production Reset Successfully");
 
