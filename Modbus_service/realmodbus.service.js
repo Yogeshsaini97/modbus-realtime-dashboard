@@ -42,7 +42,7 @@ const CONFIG = {
     // COMMON
     slaveId: 1,
 
-    pollingInterval: 60000
+    pollingInterval: 1000
 
 };
 
