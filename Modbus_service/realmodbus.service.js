@@ -135,17 +135,21 @@ async function pollMachineData() {
         /*
         -----------------------------------------
         Read Holding Registers
-        40500 - 40510
+        40501 - 40511
         -----------------------------------------
         */
 
         const holdingRegisters =
             await client.readHoldingRegisters(500, 11);
 
-            const currentPipeRegister =
-    await client.readHoldingRegisters(120, 1);
+        /*
+        -----------------------------------------
+        Read Current Pipe Length (40120)
+        -----------------------------------------
+        */
 
-            
+        const currentPipeRegister =
+            await client.readHoldingRegisters(120, 1);
 
         /*
         -----------------------------------------
@@ -165,147 +169,153 @@ async function pollMachineData() {
         const frequency =
             holdingRegisters.data[4];
 
-       let pipeLength =
-    currentPipeRegister.data[0];
-
-    if (resetRequested) {
-
-    pipeLengthOffset = pipeLength;
-
-    previousPipeLength = 0;
-
-    totalPipeLength = 0;
-
-    resetRequested = false;
-
-    console.log("\n====================================");
-
-    console.log("NEW PRODUCTION STARTED");
-
-    console.log("Baseline :", pipeLengthOffset);
-
-    console.log("====================================\n");
-
-}
-
-pipeLength = Math.max(
-
-    0,
-
-    pipeLength - pipeLengthOffset
-
-);
-
-/*
------------------------------------------
-Pipe Production Tracking
------------------------------------------
-*/
-
-/*
------------------------------------------
-TOTAL PRODUCTION
------------------------------------------
-*/
-
-// First reading
-if (previousPipeLength === 0) {
-
-    previousPipeLength = pipeLength;
-
-}
-
-// Pipe increased
-if (pipeLength > previousPipeLength) {
-
-    totalPipeLength += (pipeLength - previousPipeLength);
-
-}
-
-// Pipe reset to zero (new pipe)
-if (pipeLength < previousPipeLength) {
-
-    totalPipeLength += pipeLength;
-
-}
-
-previousPipeLength = pipeLength;
-
-const alarm =
-    holdingRegisters.data[10] === 1;
+        let pipeLength =
+            currentPipeRegister.data[0];
 
         /*
         -----------------------------------------
-        DEBUG OUTPUT
+        REGISTER DEBUG
+        -----------------------------------------
+        */
+
+        console.log("\n========================================");
+        console.log("PLC REGISTER DEBUG");
+        console.log("========================================");
+        console.log("40120 Raw Pipe Length :", pipeLength);
+        console.log("40505 Frequency       :", frequency);
+        console.log("40511 Alarm Register  :", holdingRegisters.data[10]);
+        console.log("Machine Status        :", machineStatus);
+        console.log("========================================\n");
+
+        /*
+        -----------------------------------------
+        RESET BASELINE
+        -----------------------------------------
+        */
+
+        if (resetRequested) {
+
+            pipeLengthOffset = pipeLength;
+
+            previousPipeLength = 0;
+
+            totalPipeLength = 0;
+
+            resetRequested = false;
+
+            console.log("\n====================================");
+            console.log("NEW PRODUCTION STARTED");
+            console.log("Baseline Offset :", pipeLengthOffset);
+            console.log("====================================\n");
+
+        }
+
+        console.log("Raw Pipe Length        :", pipeLength);
+        console.log("Pipe Length Offset     :", pipeLengthOffset);
+
+        pipeLength = Math.max(
+
+            0,
+
+            pipeLength - pipeLengthOffset
+
+        );
+
+        console.log("Displayed Pipe Length  :", pipeLength);
+
+        /*
+        -----------------------------------------
+        TOTAL PRODUCTION
+        -----------------------------------------
+        */
+
+        console.log("\n====================================");
+        console.log("PRODUCTION TRACKING");
+        console.log("====================================");
+        console.log("Previous Pipe Length :", previousPipeLength);
+        console.log("Current Pipe Length  :", pipeLength);
+        console.log("Current Total        :", totalPipeLength);
+
+        // First reading
+
+        if (previousPipeLength === 0) {
+
+            previousPipeLength = pipeLength;
+
+            console.log("First Reading Detected");
+
+        }
+
+        // Pipe increased
+
+        if (pipeLength > previousPipeLength) {
+
+            const difference =
+                pipeLength - previousPipeLength;
+
+            totalPipeLength += difference;
+
+            console.log(
+                `Pipe Increased +${difference} mm`
+            );
+
+        }
+
+        // Pipe reset (new pipe)
+
+        if (pipeLength < previousPipeLength) {
+
+            totalPipeLength += pipeLength;
+
+            console.log(
+                `New Pipe Started +${pipeLength} mm`
+            );
+
+        }
+
+        previousPipeLength = pipeLength;
+
+        console.log("------------------------------------");
+        console.log("Updated Previous :", previousPipeLength);
+        console.log("Updated Total    :", totalPipeLength);
+        console.log("====================================\n");
+
+        const alarm =
+            holdingRegisters.data[10] === 1;
+
+        /*
+        -----------------------------------------
+        COMPLETE DEBUG TABLE
         -----------------------------------------
         */
 
         console.clear();
 
-        console.log("========================================");
-        console.log("      LIVE PLC REGISTER MONITOR");
-        console.log("========================================\n");
-
-        console.log("📘 HOLDING REGISTERS");
-
-        console.log("----------------------------------------");
-
-        holdingRegisters.data.forEach((value, index) => {
-
-            console.log(
-
-                `40${500 + index} = ${value}`
-
-            );
-
-        });
-
-        console.log("\n📗 COILS");
-
-        console.log("----------------------------------------");
-
-        coils.data.forEach((value, index) => {
-
-            console.log(
-
-                `${String(index + 1).padStart(5, "0")} = ${value}`
-
-            );
-
-        });
-
-        console.log("\n========================================");
-        console.log(" INTERPRETED MACHINE DATA");
-        console.log("========================================");
-
         console.table({
 
-    "Machine Status": machineStatus,
+            "Machine Status": machineStatus,
 
-    "Frequency (Hz)": frequency,
+            "Frequency (Hz)": frequency,
 
-    "Current Pipe (mm)": pipeLength,
+            "40120 Raw Value": currentPipeRegister.data[0],
 
-    "Total Produced (mm)": totalPipeLength + pipeLength,
+            "Pipe Offset": pipeLengthOffset,
 
-    "Alarm Register": holdingRegisters.data[10],
+            "Displayed Pipe": pipeLength,
 
-    "Alarm Status": alarm
+            "Previous Pipe": previousPipeLength,
 
-});
-        if (alarm) {
+            "Total Produced": totalPipeLength + pipeLength,
 
-            console.log("\n🚨 LOW FREQUENCY ALARM ACTIVE");
+            "Alarm Register": holdingRegisters.data[10],
 
-        } else {
+            "Alarm Status": alarm
 
-            console.log("\n✅ MACHINE HEALTHY");
-
-        }
+        });
 
         /*
         -----------------------------------------
-        Payload to React
+        Payload
         -----------------------------------------
         */
 
@@ -313,29 +323,37 @@ const alarm =
 
             timestamp: Date.now(),
 
-           registers: {
+            registers: {
 
-    motorStatus: machineStatus,
+                motorStatus: machineStatus,
 
-    frequency,
+                frequency,
 
-    pipeLength,
+                pipeLength,
 
-    totalPipeLength: totalPipeLength + pipeLength,
+                totalPipeLength: totalPipeLength + pipeLength,
 
-    alarm,
+                alarm,
 
-    alarmMessage:
+                alarmMessage:
 
-        alarm
+                    alarm
 
-            ? "Machine 1 Motor Frequency Below 40 Hz"
+                        ? "Machine 1 Motor Frequency Below 40 Hz"
 
-            : ""
+                        : ""
 
-}
+            }
 
         };
+
+        console.log("\n====================================");
+        console.log("PAYLOAD TO REACT");
+        console.log("====================================");
+
+        console.dir(payload, { depth: null });
+
+        console.log("====================================\n");
 
         emitModbusData(payload);
 
