@@ -50,8 +50,8 @@ io.on("connection", (socket) => {
     console.log("RESET REQUEST FROM DASHBOARD");
     console.log("====================================");
 
-    // resetProductionReal();
-    resetProductionDummy();
+    resetProductionReal();
+    // resetProductionDummy();
 
     socket.emit("system-reset-complete");
 
