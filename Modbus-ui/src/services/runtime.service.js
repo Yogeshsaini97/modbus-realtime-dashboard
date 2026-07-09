@@ -10,7 +10,7 @@ class RuntimeService {
         const runtime = StorageService.get(
             APP_CONFIG.STORAGE_KEYS.MACHINE_RUNTIME,
             {
-                todayRuntime: 0,
+                todayRuntime: 60,
                 todayOffTime: 0,
                 startCount: 0,
                 stopCount: 0,
