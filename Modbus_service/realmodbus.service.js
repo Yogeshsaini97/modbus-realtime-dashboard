@@ -244,19 +244,56 @@ TOTAL PRODUCTION
 -----------------------------------------
 */
 
-totalPipeLength += pipeLength;
+/*
+-----------------------------------------
+TOTAL PRODUCTION
+-----------------------------------------
+*/
 
-console.log("====================================");
-console.log("PRODUCTION");
-console.log("====================================");
-console.log("Current Pipe Length :", pipeLength);
-console.log("Total Produced      :", totalPipeLength);
+console.log("\n====================================");
+console.log("PRODUCTION TRACKING");
 console.log("====================================");
 
-        console.log("------------------------------------");
-        console.log("Updated Previous :", previousPipeLength);
-        console.log("Updated Total    :", totalPipeLength);
-        console.log("====================================\n");
+console.log("Previous Pipe Length :", previousPipeLength);
+console.log("Current Pipe Length  :", pipeLength);
+
+// First Reading
+if (previousPipeLength === 0) {
+
+    previousPipeLength = pipeLength;
+
+    console.log("First Reading");
+
+}
+
+// Pipe is increasing
+else if (pipeLength >= previousPipeLength) {
+
+    const difference = pipeLength - previousPipeLength;
+
+    totalPipeLength += difference;
+
+    console.log(`Pipe Increased : +${difference} mm`);
+
+}
+
+// Pipe completed and restarted
+else {
+
+    console.log("New Pipe Detected");
+
+    totalPipeLength += pipeLength;
+
+    console.log(`Added New Pipe Length : +${pipeLength} mm`);
+
+}
+
+previousPipeLength = pipeLength;
+
+console.log("------------------------------------");
+console.log("Updated Previous :", previousPipeLength);
+console.log("Updated Total    :", totalPipeLength);
+console.log("====================================\n");
 
         const alarm =
             holdingRegisters.data[10] === 1;
@@ -283,7 +320,7 @@ console.log("====================================");
 
             "Previous Pipe": previousPipeLength,
 
-            "Total Produced": totalPipeLength + pipeLength,
+         "Total Produced": totalPipeLength,
 
             "Alarm Register": holdingRegisters.data[10],
 
@@ -303,26 +340,25 @@ console.log("====================================");
 
             registers: {
 
-                motorStatus: machineStatus,
+    motorStatus: machineStatus,
 
-                frequency,
+    frequency,
 
-                pipeLength,
+    pipeLength,
 
-                totalPipeLength,
+    totalPipeLength,
 
-                alarm,
+    alarm,
 
-                alarmMessage:
+    alarmMessage:
 
-                    alarm
+        alarm
 
-                        ? "Machine 1 Motor Frequency Below 40 Hz"
+            ? "Machine 1 Motor Frequency Below 40 Hz"
 
-                        : ""
+            : ""
 
-            }
-
+}
         };
 
         console.log("\n====================================");
