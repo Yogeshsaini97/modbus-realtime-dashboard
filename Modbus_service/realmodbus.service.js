@@ -277,6 +277,10 @@ function startPolling() {
 
     }
 
+    // Read immediately on startup
+    pollMachineData();
+
+    // Then poll every minute
     pollingTimer = setInterval(() => {
 
         pollMachineData();
