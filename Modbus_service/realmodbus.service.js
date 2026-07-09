@@ -8,7 +8,7 @@ const client = new ModbusRTU();
 Production Tracking
 -----------------------------------------
 */
-
+let totalPipeLength = 0;
 
 
 let resetRequested = false;
