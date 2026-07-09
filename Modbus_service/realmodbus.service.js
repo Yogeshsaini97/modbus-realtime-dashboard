@@ -238,42 +238,20 @@ async function pollMachineData() {
 
         // First reading
 
-        if (previousPipeLength === 0) {
+        /*
+-----------------------------------------
+TOTAL PRODUCTION
+-----------------------------------------
+*/
 
-            previousPipeLength = pipeLength;
+totalPipeLength += pipeLength;
 
-            console.log("First Reading Detected");
-
-        }
-
-        // Pipe increased
-
-        if (pipeLength > previousPipeLength) {
-
-            const difference =
-                pipeLength - previousPipeLength;
-
-            totalPipeLength += difference;
-
-            console.log(
-                `Pipe Increased +${difference} mm`
-            );
-
-        }
-
-        // Pipe reset (new pipe)
-
-        if (pipeLength < previousPipeLength) {
-
-            totalPipeLength += pipeLength;
-
-            console.log(
-                `New Pipe Started +${pipeLength} mm`
-            );
-
-        }
-
-        previousPipeLength = pipeLength;
+console.log("====================================");
+console.log("PRODUCTION");
+console.log("====================================");
+console.log("Current Pipe Length :", pipeLength);
+console.log("Total Produced      :", totalPipeLength);
+console.log("====================================");
 
         console.log("------------------------------------");
         console.log("Updated Previous :", previousPipeLength);
@@ -331,7 +309,7 @@ async function pollMachineData() {
 
                 pipeLength,
 
-                totalPipeLength: totalPipeLength + pipeLength,
+                totalPipeLength,
 
                 alarm,
 
