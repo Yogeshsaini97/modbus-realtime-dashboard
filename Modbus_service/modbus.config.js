@@ -13,7 +13,7 @@ module.exports = {
 
   slaveID: 1,
 
-  pollingInterval: 1000,
+  pollingInterval: 10000,
 
   // REGISTERS
   holdingRegisters: {
