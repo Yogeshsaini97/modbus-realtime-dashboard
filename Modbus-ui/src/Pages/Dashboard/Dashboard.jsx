@@ -662,7 +662,7 @@ Rated Speed
 </Typography>
 
 <Typography fontWeight="bold">
-9300 RPM
+930 RPM
 </Typography>
 
 </Grid>
