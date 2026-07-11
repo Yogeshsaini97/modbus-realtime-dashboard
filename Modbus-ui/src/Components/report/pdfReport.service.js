@@ -36,7 +36,7 @@ class PdfReportService {
 
         doc.setFontSize(20);
 
-        doc.text("MotorVision™", 14, 12);
+        doc.text("Vansh Industries", 14, 12);
 
         doc.setFontSize(10);
 
