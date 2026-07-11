@@ -297,7 +297,7 @@ useEffect(() => {
                             </Typography>
 
                             <Typography variant="h6">
-                               Pipe making machine
+                               Braiding Machine no. 17
                             </Typography>
         
 
@@ -582,7 +582,7 @@ variant="h6"
 fontWeight="bold"
 >
 
-Servo Drive
+AC Drive
 
 </Typography>
 
@@ -650,7 +650,7 @@ Motor Power
 </Typography>
 
 <Typography fontWeight="bold">
-5.5 kW
+1.5 kW
 </Typography>
 
 </Grid>
@@ -662,7 +662,7 @@ Rated Speed
 </Typography>
 
 <Typography fontWeight="bold">
-1500 RPM
+9300 RPM
 </Typography>
 
 </Grid>
@@ -679,17 +679,7 @@ Voltage
 
 </Grid>
 
-<Grid item xs={6}>
 
-<Typography color="gray" fontSize={13}>
-Serial No.
-</Typography>
-
-<Typography fontWeight="bold">
-SM-2026-00145
-</Typography>
-
-</Grid>
 
 <Grid item xs={6}>
 

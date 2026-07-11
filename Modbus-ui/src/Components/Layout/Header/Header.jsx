@@ -56,7 +56,7 @@ function Header() {
 
                     <Typography variant="h6">
 
-                        Widhin Imap
+                        Vansh Industries
 
                     </Typography>
 

@@ -72,9 +72,9 @@ class PdfReportService {
 
             body: [
 
-    ["Machine Name", "Pipe Cutting Machine 01"],
+    ["Machine Name", "Braiding Machine No. 17"],
 
-    ["Machine ID", "PCM-01"],
+    ["Machine ID", "Machine number 17"],
 
     ["Operator Name", operatorName],
 
@@ -257,7 +257,7 @@ class PdfReportService {
 
         doc.text(
 
-            "MotorVision™ Industrial Monitoring Platform",
+            "Vansh Industries - Industrial Monitoring Platform",
 
             14,
 

@@ -60,7 +60,7 @@ function Sidebar() {
 
                 >
 
-                    Widhin Imap
+                    Vansh Industries
 
                 </Typography>
 
