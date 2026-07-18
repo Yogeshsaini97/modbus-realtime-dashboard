@@ -6,7 +6,6 @@ class ReportService {
 
     downloadExcel(history) {
 
-        console.log("Current History :", history);
 
         if (!history || !history.length) {
 

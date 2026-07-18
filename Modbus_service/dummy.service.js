@@ -12,7 +12,6 @@ let pipeLength = 0;
 // Total Production
 let totalPipeLength = 0;
 
-let previousPipeLength = 0;
 
 
 
@@ -24,8 +23,6 @@ let direction = -0.3;
 
 
 function generateDummyData() {
-
-    let displayPipeLength = pipeLength;
 
     // Random machine OFF
     if (motorStatus === "ON" && Math.random() > 0.995) {
@@ -47,16 +44,9 @@ function generateDummyData() {
     if (motorStatus === "ON") {
 
         /*
+        -----------------------------------------
         Smooth Frequency Movement
-
-        52
-        51.7
-        51.4
-        51.1
-        50.8
-        50.5
-        50.2
-        49.9  <-- Alarm
+        -----------------------------------------
         */
 
         frequency += direction;
@@ -75,59 +65,30 @@ function generateDummyData() {
 
         frequency = Number(frequency.toFixed(1));
 
-        // Pipe Production
+        /*
+        -----------------------------------------
+        Pipe Production (Same as Real PLC)
+        -----------------------------------------
+        */
 
-       /*
------------------------------------------
-Pipe Production
------------------------------------------
-*/
+        // Production generated in this polling interval
+        pipeLength = Math.floor(Math.random() * 70) + 50;
 
-/*
------------------------------------------
-Pipe Production
------------------------------------------
-*/
+        // Total production
+        totalPipeLength += pipeLength;
 
-pipeLength += Math.floor(Math.random() * 70) + 50;
+    } else {
 
-/*
-New Pipe
-*/
-
-if (pipeLength >= 6000) {
-
-    pipeLength = 0;
-
-}
-
-/*
------------------------------------------
-Total Production
------------------------------------------
-*/
-
-if (previousPipeLength === 0) {
-
-    previousPipeLength = pipeLength;
-
-}
-
-if (pipeLength > previousPipeLength) {
-
-    totalPipeLength += (pipeLength - previousPipeLength);
-
-}
-
-if (pipeLength < previousPipeLength) {
-
-    totalPipeLength += pipeLength;
-
-}
-
-previousPipeLength = pipeLength;
+        // Machine OFF
+        pipeLength = 0;
 
     }
+
+    /*
+    -----------------------------------------
+    Alarm
+    -----------------------------------------
+    */
 
     alarm =
         motorStatus === "ON" &&
@@ -137,23 +98,23 @@ previousPipeLength = pipeLength;
 
         timestamp: Date.now(),
 
-registers: {
+        registers: {
 
-    motorStatus,
+            motorStatus,
 
-    frequency,
+            frequency,
 
-   pipeLength,
+            pipeLength,
 
-totalPipeLength,
+            totalPipeLength,
 
-    alarm,
+            alarm,
 
-    alarmMessage: alarm
-        ? "Machine 1 Motor Frequency Below 40 Hz"
-        : ""
+            alarmMessage: alarm
+                ? "Machine 1 Motor Frequency Below 40 Hz"
+                : ""
 
-}
+        }
 
     };
 
@@ -193,16 +154,17 @@ function startDummyPolling() {
 function resetProductionDummy() {
 
     console.log("\n====================================");
-    console.log("SYSTEM RESET");
+    console.log("SYSTEM RESET REQUEST RECEIVED");
     console.log("====================================");
 
     pipeLength = 0;
-
     totalPipeLength = 0;
 
-    previousPipeLength = 0;
+    const payload = generateDummyData();
 
-    console.log("✅ Production Reset Completed");
+    emitModbusData(payload);
+
+    console.log("✅ Total Production Reset Successfully");
 
 }
 

@@ -105,7 +105,6 @@ class RuntimeService {
 
     );
 
-    console.log("✅ Runtime Reset");
 
     return runtime;
 

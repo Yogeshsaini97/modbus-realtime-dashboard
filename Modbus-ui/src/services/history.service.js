@@ -55,9 +55,9 @@ if (now - this.lastSaveTime < SAVE_INTERVAL) {
 
     );
 
-    console.log("📄 History Saved");
+  
 
-    console.log("History Count :", filteredHistory.length);
+    
 
     return filteredHistory;
 

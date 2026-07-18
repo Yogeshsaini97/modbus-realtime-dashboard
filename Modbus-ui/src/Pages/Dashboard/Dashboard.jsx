@@ -4,6 +4,8 @@ import {
     Avatar,
     Box,
     Button,
+    Card,
+    CardContent,
     Chip,
     Divider,
     Grid,
@@ -38,6 +40,9 @@ import ScheduleResetDialog from "../../Components/ScheduleResetDialog/ScheduleRe
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import resetSchedulerService from "../../services/resetScheduler.service";
 import operatorService from "../../services/operator.service";
+import ShiftSettingsDialog from "../../Components/ShiftSettingsDialog/ShiftSettingsDialog";
+import shiftService from "../../services/shift.service";
+import ShiftInfoCard from "../../Components/ShiftInfoCard/ShiftInfoCard";
 
 function Dashboard() {
 
@@ -66,6 +71,8 @@ const [editingOperator, setEditingOperator] = useState(
     operatorName === "Unassigned"
 );
 
+const [openShiftSettings, setOpenShiftSettings] = useState(false);
+
 const saveOperator = () => {
 
     const name = operatorInput.trim() || "Unassigned";
@@ -83,17 +90,15 @@ const saveOperator = () => {
 
     const updateCountdown = () => {
 
-        console.log("====================================");
-        console.log("CHECKING SCHEDULE...");
-        console.log("====================================");
+      
 
         const schedule = resetSchedulerService.get();
 
-        console.log("Schedule :", schedule);
+     
 
         if (!schedule || !schedule.enabled) {
 
-            console.log("❌ No Reset Scheduled");
+           
 
             setTimeLeft("No Reset Scheduled");
 
@@ -105,21 +110,17 @@ const saveOperator = () => {
 
         const now = dayjs();
 
-        console.log("Current Time :", now.format("DD MMM YYYY hh:mm:ss A"));
-
-        console.log("Reset Time   :", resetTime.format("DD MMM YYYY hh:mm:ss A"));
-
-        console.log("Is Valid Date :", resetTime.isValid());
+     
 
         const diff = resetTime.diff(now);
 
-        console.log("Difference (ms) :", diff);
+     
 
 if (diff <= 0 && !resetExecuted) {
 
     setResetExecuted(true);
 
-    console.log("Executing Scheduled Reset");
+   
 
     if (schedule.mode === "once") {
 
@@ -143,7 +144,7 @@ if (diff <= 0 && !resetExecuted) {
 
         });
 
-        console.log("Next Reset :", tomorrow);
+   
 
     }
 
@@ -168,18 +169,15 @@ if (diff > 60000 && resetExecuted) {
             (diff % (1000 * 60)) / 1000
         );
 
-        console.log("Hours   :", hours);
-        console.log("Minutes :", minutes);
-        console.log("Seconds :", seconds);
-
+   
         const countdown =
             `${hours} Hr ${minutes} Min ${seconds} Sec`;
 
-        console.log("Countdown :", countdown);
+     
 
         setTimeLeft(countdown);
 
-        console.log("====================================");
+    
 
     };
 
@@ -538,349 +536,14 @@ icon={<AccessTimeFilledIcon sx={{fontSize:42}} />}
   }}
                 >
 
+
                    
 
-                    <Grid  item xs={12} lg={4}>
+  
 
-<Paper
-    elevation={0}
-    sx={{
-        height: "100%",
-        p: 3,
-        borderRadius: 4,
-        background: "#1E293B",
-        border: "1px solid rgba(255,255,255,.08)",
-        boxShadow: "0 15px 35px rgba(0,0,0,.25)"
-    }}
->
 
-<Box
-display="flex"
-alignItems="center"
-justifyContent="space-between"
-mb={2}
->
-
-<Stack direction="row" spacing={2} alignItems="center">
-
-<Avatar
-sx={{
-bgcolor:"#2563EB",
-width:52,
-height:52
-}}
->
-
-<PrecisionManufacturingIcon/>
-
-</Avatar>
-
-<Box > 
-
-<Typography
-variant="h6"
-fontWeight="bold"
->
-
-AC Drive
-
-</Typography>
-
-<Typography
-variant="body2"
-color="gray"
->
-
-Industrial Servo System
-
-</Typography>
-
-</Box>
-
-</Stack>
-
-<Chip
-    icon={<VerifiedIcon />}
-    label={
-        machineData.alarm
-            ? "Low Frequency Alarm"
-            : "Healthy"
-    }
-    color={
-        machineData.alarm
-            ? "error"
-            : "success"
-    }
-/>
-
-</Box>
-
-<Divider sx={{mb:2}}/>
-
-<Grid container spacing={2}>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Motor Company
-</Typography>
-
-<Typography fontWeight="bold">
-N/A
-</Typography>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Model
-</Typography>
-
-<Typography fontWeight="bold">
-N/A
-</Typography>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Motor Power
-</Typography>
-
-<Typography fontWeight="bold">
-1.5 kW
-</Typography>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Rated Speed
-</Typography>
-
-<Typography fontWeight="bold">
-930 RPM
-</Typography>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Voltage
-</Typography>
-
-<Typography fontWeight="bold">
-415 VAC
-</Typography>
-
-</Grid>
-
-
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Service Due
-</Typography>
-
-<Chip
-size="small"
-label="12 Jul 2026"
-color="warning"
-/>
-
-</Grid>
-
-<Grid item xs={6}>
-
-<Typography color="gray" fontSize={13}>
-Software
-</Typography>
-
-<Typography fontWeight="bold">
-v1.0.0
-</Typography>
-
-</Grid>
-
-</Grid>
-
-<Divider sx={{my:3}}/>
-
-<Typography
-variant="subtitle1"
-fontWeight="bold"
-mb={2}
->
-
-Live Machine Data
-
-</Typography>
-
-<Stack spacing={1.5}>
-
-<Box
-display="flex"
-justifyContent="space-between"
->
-
-<Typography color="gray">
-
-Machine Status
-
-</Typography>
-
-<Chip
-
-size="small"
-
-label={machineData.motorStatus}
-
-color={
-machineData.motorStatus==="ON"
-?"success"
-:"error"
-}
-
-/>
-
-</Box>
-
-<Box
-display="flex"
-justifyContent="space-between"
->
-
-<Typography color="gray">
-
-Motor Frequency
-
-</Typography>
-
-<Typography fontWeight="bold">
-
-{machineData.frequency} Hz
-
-</Typography>
-
-</Box>
-
-<Box
-display="flex"
-justifyContent="space-between"
->
-
-<Typography color="gray">
-
-Pipe Length
-
-</Typography>
-
-<Typography fontWeight="bold">
-
-{formatPipeLength(machineData.pipeLength)}
-
-</Typography>
-
-</Box>
-
-<Box
-display="flex"
-justifyContent="space-between"
->
-
-<Typography color="gray">
-
-Alarm Status
-
-</Typography>
-
-<Chip
-
-size="small"
-
-label={
-machineData.alarm
-?"ACTIVE"
-:"HEALTHY"
-}
-
-color={
-machineData.alarm
-?"error"
-:"success"
-}
-
-/>
-
-</Box>
-
-<Box
-display="flex"
-justifyContent="space-between"
->
-
-<Typography color="gray">
-
-Events Today
-
-</Typography>
-
-<Typography fontWeight="bold">
-
-{events.length}
-
-</Typography>
-
-</Box>
-
-</Stack>
-
-<Divider sx={{my:3}}/>
-
-<Box
-display="flex"
-justifyContent="space-between"
-alignItems="center"
->
-
-<Stack
-direction="row"
-spacing={1}
-alignItems="center"
->
-
-<EngineeringIcon
-sx={{color:"#2563EB"}}
-/>
-
-<Typography
-fontSize={13}
-color="gray"
->
-
-Powered by
-
-<b style={{color:"#fff"}}> Saini Enterprises</b>
-
-</Typography>
-
-</Stack>
-
-<MemoryIcon
-sx={{
-color:"#22C55E"
-}}
-/>
-
-</Box>
-
-</Paper>
-
+                   <Grid item xs={12} md={6} lg={4}>
+    <ShiftInfoCard />
 </Grid>
  <Grid item xs={12} lg={8} sx={{width: "400px"}}>
 
@@ -1013,6 +676,16 @@ color:"#22C55E"
 
 )}
 
+<Button
+    variant="contained"
+    onClick={() => setOpenShiftSettings(true)}
+>
+    Shift Settings
+</Button>
+<ShiftSettingsDialog
+    open={openShiftSettings}
+    onClose={() => setOpenShiftSettings(false)}
+/>
 
     <Typography
         sx={{
@@ -1287,8 +960,358 @@ color:"#22C55E"
 
                     </Grid>
 
-                </Grid>
+ 
 
+                </Grid>
+                
+                <Card>
+
+
+
+</Card>
+                  <Grid  item xs={12} sx={{my:3}} lg={4}>
+
+<Paper
+    elevation={0}
+    sx={{
+        height: "100%",
+        p: 3,
+        borderRadius: 4,
+        background: "#1E293B",
+        border: "1px solid rgba(255,255,255,.08)",
+        boxShadow: "0 15px 35px rgba(0,0,0,.25)"
+    }}
+>
+
+<Box
+display="flex"
+alignItems="center"
+justifyContent="space-between"
+mb={2}
+>
+
+<Stack direction="row" spacing={2} alignItems="center">
+
+<Avatar
+sx={{
+bgcolor:"#2563EB",
+width:52,
+height:52
+}}
+>
+
+<PrecisionManufacturingIcon/>
+
+</Avatar>
+
+<Box > 
+
+<Typography
+variant="h6"
+fontWeight="bold"
+>
+
+AC Drive
+
+</Typography>
+
+<Typography
+variant="body2"
+color="gray"
+>
+
+Industrial Servo System
+
+</Typography>
+
+</Box>
+
+</Stack>
+
+<Chip
+    icon={<VerifiedIcon />}
+    label={
+        machineData.alarm
+            ? "Low Frequency Alarm"
+            : "Healthy"
+    }
+    color={
+        machineData.alarm
+            ? "error"
+            : "success"
+    }
+/>
+
+</Box>
+
+<Divider sx={{mb:2}}/>
+
+
+<Grid container spacing={2}>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Motor Company
+</Typography>
+
+<Typography fontWeight="bold">
+N/A
+</Typography>
+
+</Grid>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Model
+</Typography>
+
+<Typography fontWeight="bold">
+N/A
+</Typography>
+
+</Grid>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Motor Power
+</Typography>
+
+<Typography fontWeight="bold">
+1.5 kW
+</Typography>
+
+</Grid>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Rated Speed
+</Typography>
+
+<Typography fontWeight="bold">
+930 RPM
+</Typography>
+
+</Grid>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Voltage
+</Typography>
+
+<Typography fontWeight="bold">
+415 VAC
+</Typography>
+
+</Grid>
+
+
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Service Due
+</Typography>
+
+<Chip
+size="small"
+label="12 Jul 2026"
+color="warning"
+/>
+
+</Grid>
+
+<Grid item xs={6}>
+
+<Typography color="gray" fontSize={13}>
+Software
+</Typography>
+
+<Typography fontWeight="bold">
+v1.0.0
+</Typography>
+
+</Grid>
+
+</Grid>
+
+<Divider sx={{my:3}}/>
+
+<Typography
+variant="subtitle1"
+fontWeight="bold"
+mb={2}
+>
+
+Live Machine Data
+
+</Typography>
+
+<Stack spacing={1.5}>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Machine Status
+
+</Typography>
+
+<Chip
+
+size="small"
+
+label={machineData.motorStatus}
+
+color={
+machineData.motorStatus==="ON"
+?"success"
+:"error"
+}
+
+/>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Motor Frequency
+
+</Typography>
+
+<Typography fontWeight="bold">
+
+{machineData.frequency} Hz
+
+</Typography>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Pipe Length
+
+</Typography>
+
+<Typography fontWeight="bold">
+
+{formatPipeLength(machineData.pipeLength)}
+
+</Typography>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Alarm Status
+
+</Typography>
+
+<Chip
+
+size="small"
+
+label={
+machineData.alarm
+?"ACTIVE"
+:"HEALTHY"
+}
+
+color={
+machineData.alarm
+?"error"
+:"success"
+}
+
+/>
+
+</Box>
+
+<Box
+display="flex"
+justifyContent="space-between"
+>
+
+<Typography color="gray">
+
+Events Today
+
+</Typography>
+
+<Typography fontWeight="bold">
+
+{events.length}
+
+</Typography>
+
+</Box>
+
+</Stack>
+
+<Divider sx={{my:3}}/>
+
+<Box
+display="flex"
+justifyContent="space-between"
+alignItems="center"
+>
+
+<Stack
+direction="row"
+spacing={1}
+alignItems="center"
+>
+
+<EngineeringIcon
+sx={{color:"#2563EB"}}
+/>
+
+<Typography
+fontSize={13}
+color="gray"
+>
+
+Powered by
+
+<b style={{color:"#fff"}}> Saini Enterprises</b>
+
+</Typography>
+
+</Stack>
+
+<MemoryIcon
+sx={{
+color:"#22C55E"
+}}
+/>
+
+</Box>
+
+</Paper>
+
+</Grid>
             </Box>
 <AlarmDialog
     open={machineData.alarm && !alarmAcknowledged}

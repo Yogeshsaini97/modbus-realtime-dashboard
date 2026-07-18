@@ -72,13 +72,7 @@ function ScheduleResetDialog({
 
 });
 
-        console.log("==================================");
-
-        console.log("RESET SCHEDULED");
-
-        console.log(resetAt.format("DD MMM YYYY hh:mm A"));
-
-        console.log("==================================");
+      
 
         onClose();
 
@@ -120,15 +114,13 @@ function ScheduleResetDialog({
 
                         />
 
-                        <TimePicker
-
-                            label="Reset Time"
-
-                            value={time}
-
-                            onChange={setTime}
-
-                        />
+                      <TimePicker
+    label="Reset Time"
+    value={time}
+    onChange={setTime}
+    ampm={false}
+    format="HH:mm"
+/>
 
                         <FormControlLabel
 
@@ -192,18 +184,18 @@ function ScheduleResetDialog({
     </RadioGroup>
 
 </FormControl>
-                        <Typography>
+                       <Typography>
 
-                            Selected Time :
+    Selected Time :
 
-                            {" "}
+    {" "}
 
-                            {date
-                                .hour(time.hour())
-                                .minute(time.minute())
-                                .format("DD MMM YYYY hh:mm A")}
+    {date
+        .hour(time.hour())
+        .minute(time.minute())
+        .format("DD MMM YYYY HH:mm")}
 
-                        </Typography>
+</Typography>
 
                     </Stack>
 

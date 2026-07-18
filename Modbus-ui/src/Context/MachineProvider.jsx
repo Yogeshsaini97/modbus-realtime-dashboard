@@ -7,15 +7,26 @@ import HistoryService from "../services/history.service";
 import RuntimeService from "../services/runtime.service";
 import EventService from "../services/event.service";
 
+
 import { APP_CONFIG } from "../config/app.config";
 
 import socket from "../Socket/Socket";
 import pdfReportService from "../Components/report/pdfReport.service";
 import operatorService from "../services/operator.service";
+import shiftService from "../services/shift.service";
+
+
 
 function MachineProvider({ children }) {
 
     const [connected, setConnected] = useState(false);
+const [intervalData, setIntervalData] = useState(
+    shiftService.getIntervalData()
+);
+
+const [currentInterval, setCurrentInterval] = useState(
+    shiftService.getCurrentInterval()
+);
 
     const [machineData, setMachineData] = useState(
 
@@ -118,6 +129,27 @@ function MachineProvider({ children }) {
                     newState.motorStatus
 
                 );
+const intervalChanged =
+    shiftService.checkIntervalChange();
+
+if (intervalChanged) {
+
+    console.log("Interval changed. Resetting system...");
+
+    resetSystem(false);
+
+}
+
+                shiftService.updateProduction(newState.pipeLength);
+
+shiftService.updateRuntime(updatedRuntime);
+
+const updatedIntervalData =
+    shiftService.getIntervalData();
+
+    shiftService.setOperator(
+    operatorService.get()
+);
 
             let updatedEvents = events;
 
@@ -167,6 +199,12 @@ function MachineProvider({ children }) {
 
             setRuntime(updatedRuntime);
 
+           setIntervalData(updatedIntervalData);
+
+setCurrentInterval(
+    shiftService.getCurrentInterval()
+);
+
             setEvents(updatedEvents);
 
         });
@@ -184,34 +222,29 @@ function MachineProvider({ children }) {
     }, [machineData, events]);
 
 
-const resetSystem = () => {
-  pdfReportService.download(
+function resetSystem() {
 
-            machineData,
+    pdfReportService.download(
+        machineData,
+        history,
+        runtime
+    );
 
-            history,
+    alert("reseting done");
 
-            runtime
-
-        )
-    alert("reseting done")
-    console.log("======================================");
-    console.log("SYSTEM RESET");
-    console.log("======================================");
-
-    // Tell backend to reset production counters
     socket.emit("reset-system");
 
-    // Clear History
     HistoryService.clearHistory();
 
-    // Reset Runtime
     const resetRuntime = RuntimeService.reset();
 
-    // Clear Events
     EventService.clear();
 
-    // Remove Local Storage
+   shiftService.resetCurrentInterval();
+
+setIntervalData(
+    shiftService.getIntervalData()
+);
     StorageService.remove(
         APP_CONFIG.STORAGE_KEYS.MACHINE_HISTORY
     );
@@ -224,36 +257,29 @@ const resetSystem = () => {
         APP_CONFIG.STORAGE_KEYS.MACHINE_EVENTS
     );
 
-    // Update UI immediately
     setHistory([]);
 
     setRuntime(resetRuntime);
 
     setEvents([]);
-// Reset Operator
-operatorService.save("Unassigned");
 
-setOperatorName("Unassigned");
-setOperatorInput("");
-setEditingOperator(true);
-    // DON'T turn the machine OFF.
-    // Keep live PLC values and only reset the production total.
+    operatorService.save("Unassigned");
+
+    setOperatorName("Unassigned");
+    setOperatorInput("");
+    setEditingOperator(true);
+
     setMachineData(prev => ({
-
         ...prev,
-
         totalPipeLength: 0
-
     }));
 
-    console.log("✅ Dashboard Reset Completed");
-
-};
+}
     return (
 
         <MachineContext.Provider
 
-            value={{
+       value={{
 
     connected,
 
@@ -264,6 +290,10 @@ setEditingOperator(true);
     history,
 
     events,
+
+    intervalData,
+
+    currentInterval,
 
     resetSystem
 

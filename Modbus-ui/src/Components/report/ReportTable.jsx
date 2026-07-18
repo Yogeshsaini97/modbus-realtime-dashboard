@@ -63,7 +63,7 @@ function ReportTable() {
                             hover
                             key={row.timestamp}
                         >
- {console.log("row",row)}
+
                             <TableCell>
 
                                 {dayjs(row.timestamp).format(

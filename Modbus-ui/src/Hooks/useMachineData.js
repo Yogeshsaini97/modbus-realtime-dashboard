@@ -21,7 +21,6 @@ function useMachineData() {
 
         socket.on("connect", () => {
 
-            console.log("Connected");
 
             setConnected(true);
 
@@ -29,7 +28,7 @@ function useMachineData() {
 
         socket.on("disconnect", () => {
 
-            console.log("Disconnected");
+          
 
             setConnected(false);
 
@@ -37,7 +36,7 @@ function useMachineData() {
 
         socket.on("modbus-data", (payload) => {
 
-            console.log(payload);
+          
 
             setMachineData({
 
@@ -55,7 +54,7 @@ function useMachineData() {
 
         socket.on("system-reset-complete", () => {
 
-    console.log("✅ Backend Reset Successful");
+    
 
 });
 
