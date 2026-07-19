@@ -8,7 +8,8 @@ import {
     Divider,
     LinearProgress,
     Stack,
-    Avatar
+    Avatar,
+    Button
 } from "@mui/material";
 
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -21,7 +22,8 @@ import AutorenewIcon from "@mui/icons-material/Autorenew";
 import MachineContext from "../../Context/MachineContext";
 import shiftService from "../../services/shift.service";
 import shiftSettingsService from "../../services/shiftSettings.service";
-import { formatPipeLength, formatRuntime } from "../../helpers/helpers";
+import { formatPipeLength, formatRuntime, getShiftElapsedTime } from "../../helpers/helpers";
+import ShiftSettingsDialog from "../ShiftSettingsDialog/ShiftSettingsDialog";
 
 function ShiftInfoCard() {
 
@@ -37,6 +39,7 @@ function ShiftInfoCard() {
     const [remainingTime, setRemainingTime] = useState("");
 
     const [progress, setProgress] = useState(0);
+    const [openShiftSettings, setOpenShiftSettings] = useState(false);
 
     useEffect(() => {
 
@@ -221,32 +224,7 @@ const config = {
 
 const interval = shiftService.getCurrentInterval();
 
-const getShiftElapsedTime = (currentInterval) => {
-    const now = new Date();
 
-    const [startHour, startMinute] = currentInterval.start
-        .split(":")
-        .map(Number);
-
-    const shiftStart = new Date(now);
-    shiftStart.setHours(startHour, startMinute, 0, 0);
-
-    // Handle overnight shifts (e.g. 19:00 → 07:00)
-    if (
-        currentInterval.start > currentInterval.end &&
-        now.getHours() < startHour
-    ) {
-        shiftStart.setDate(shiftStart.getDate() - 1);
-    }
-
-    const diff = now - shiftStart;
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    return `${hours}h ${minutes}m ${seconds}s`;
-};
 
 
 return (
@@ -282,6 +260,7 @@ return (
                     <Typography
                         variant="h6"
                         fontWeight={700}
+
                     >
                         🏭 Shift Tracker
                     </Typography>
@@ -301,7 +280,8 @@ return (
                     sx={{
                         fontWeight: 700,
                         bgcolor: "#fff",
-                        color: "#2e7d32"
+                        color: "#2e7d32",
+                        mx:3
                     }}
                 />
 
@@ -327,7 +307,12 @@ return (
                     >
                        Current Selected Shift Timings
                     </Typography>
-
+<Button sx={{mx:"20px"}}
+    variant="contained"
+    onClick={() => setOpenShiftSettings(true)}
+>
+   Change shift timing
+</Button>
                    <Typography
     variant="h5"
     fontWeight={700}
@@ -335,9 +320,10 @@ return (
    {currentInterval.start} → {currentInterval.end}
 </Typography>
 
+
                 </Box>
 
-                <Chip
+                <Chip sx={{mx:"250px"}}
                     label={`${Math.round(progress)}% current shift Completed`}
                     color="primary"
                 />
@@ -465,7 +451,7 @@ return (
                     icon={<AutorenewIcon fontSize="small" />}
                     title="Automatic Reset"
                     value={
-                       settings.autoReset
+                       "ON"
                     }
                 />
 
@@ -488,16 +474,19 @@ return (
                     Production Status
                 </Typography>
 
-                <Chip
+                <Chip 
                     color="success"
                     label="Production Active"
-                    sx={{ fontWeight: 700 }}
+                    sx={{ fontWeight: 700 , mx:3}}
                 />
 
             </Box>
 
         </CardContent>
-
+<ShiftSettingsDialog
+    open={openShiftSettings}
+    onClose={() => setOpenShiftSettings(false)}
+/>
     </Card>
 
 );

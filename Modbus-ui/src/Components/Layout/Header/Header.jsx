@@ -28,9 +28,11 @@ function Header() {
      const [openReport, setOpenReport] = useState(false);
 
       const {
-        machineData,
-        history,
-        runtime
+         machineData,
+    history,
+    runtime,
+    currentInterval,
+    intervalData
     } = useMachine();
 
     return (
@@ -100,14 +102,12 @@ function Header() {
     onClick={() =>
 
         pdfReportService.download(
-
-            machineData,
-
-            history,
-
-            runtime
-
-        )
+    machineData,
+    history,
+    runtime,
+    currentInterval,
+    intervalData[currentInterval.key]
+)
 
     }
 

@@ -1,14 +1,20 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import dayjs from "dayjs";
-import { formatPipeLength, formatRuntime } from "../../helpers/helpers";
+import { formatPipeLength, formatRuntime, getShiftElapsedTime } from "../../helpers/helpers";
 import operatorService from "../../services/operator.service";
 
 
 class PdfReportService {
    
 
-    download(machineData, history, runtime) {
+    download(
+    machineData,
+    history,
+    runtime,
+    currentInterval,
+    intervalData
+) {
 
          const operatorName = operatorService.get();
 
@@ -54,7 +60,7 @@ class PdfReportService {
 
         doc.setFontSize(16);
 
-        doc.text("Machine Operational Report", 14, 40);
+        doc.text("Production Shift Report", 14, 40);
 
         /*
         ============================================
@@ -76,15 +82,14 @@ class PdfReportService {
 
     ["Machine ID", "Machine number 17"],
 
-    ["Operator Name", operatorName],
+    ["Assigned Operator", operatorName],
 
-    ["Motor Company", "N/A"],
+    [
+    "Current Shift",
+    `${currentInterval.start} to ${currentInterval.end}`
+],
 
-    ["Model", "N/A"],
-
-    ["Software Version", "v1.0.0"],
-
-    ["Report Generated On", dayjs().format("DD MMM YYYY hh:mm:ss A")],
+    ["Report Generated On", dayjs().format("DD MMM YYYY HH:mm:ss")],
 
     ["Machine Status", machineData.motorStatus]
 
@@ -106,72 +111,46 @@ class PdfReportService {
 
             head: [["Production Summary", "Value"]],
 
-            body: [
+           body: [
 
-                [
+[
+    "Total Pipe Produced This Shift",
+    formatPipeLength(intervalData.production)
+],
 
-                    "current motor frequency(HZ)",
+[
+    "Shift Elapsed Time",
+    getShiftElapsedTime(currentInterval)
+],
 
-                    `${machineData.frequency} Hz`
+[
+    "Machine Starts",
+    intervalData.startCount
+],
 
-                ],
+[
+    "Machine Stops",
+    intervalData.stopCount
+],
 
-                [
+[
+    "Current Motor Frequency",
+    `${machineData.frequency} Hz`
+],
 
-                    "TotalPipe Length produced",
+[
+    "Alarm Status",
+    machineData.alarm
+        ? "Low Frequency"
+        : "Healthy"
+],
 
-                    `${formatPipeLength(machineData.totalPipeLength)}`
-
-                ],
-
-                [
-
-                    "Runtime Today",
-
-                    `${formatRuntime(runtime?.todayRuntime)}`
-
-                ],
-
-                [
-
-                    "Machine Start Count",
-
-                    runtime.startCount
-
-                ],
-
-                [
-
-                    "Alarm Status",
-
-                    machineData.alarm
-
-                        ? "LOW FREQUENCY"
-
-                        : "HEALTHY"
-
-                ],
-
-                [
-
-                    "Total Records Saved",
-
-                    history.length
-
-                ],
-
-                [
-    "Total Pipe Length Produced",
-
-    `${
-       formatPipeLength( history.length
-            ? history[history.length - 1].pipeLength
-            : 0
-                 ) } `
-
+[
+    "Records Captured",
+    history.length
 ]
 
-            ]
+]
 
         });
 
@@ -181,53 +160,41 @@ class PdfReportService {
         ============================================
         */
 
-        autoTable(doc, {
+autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 10,
 
-            startY: doc.lastAutoTable.finalY + 10,
+    theme: "grid",
 
-            head: [[
+    head: [[
+        "Time",
+        "Motor Status",
+        "Frequency",
+        "Total Pipe Produced",
+        "Alarm Status"
+    ]],
 
-                "Time",
+    body: history.map(row => [
 
-                "Motor Status Recorded",
+        dayjs(row.timestamp).format(
+            "DD MMM HH:mm:ss"
+        ),
 
-                "Frequency Recorded",
+        row.motorStatus,
 
-                "Total Pipe Length",
+        `${row.frequency} Hz`,
 
-                "Alarm"
+        formatPipeLength(row.totalPipeLength),
 
-            ]],
+        row.alarm
+            ? "Low Frequency"
+            : "Healthy"
 
-            body: history.map(row => [
+    ]),
 
-                dayjs(row.timestamp).format(
-
-                    "DD MMM HH:mm:ss"
-
-                ),
-
-                row.motorStatus,
-
-                `${row.frequency} Hz`,
-
-                `${formatPipeLength(row.totalPipeLength)}`,
-
-                row.alarm
-
-                    ? "LOW"
-
-                    : "OK"
-
-            ]),
-
-            styles: {
-
-                fontSize: 8
-
-            }
-
-        });
+    styles: {
+        fontSize: 8
+    }
+});
 
         /*
         ============================================
@@ -279,13 +246,31 @@ class PdfReportService {
     .replace(/\s+/g, "_")
     .replace(/[^\w]/g, "");
 
+    const pages = doc.internal.getNumberOfPages();
+
+for (let i = 1; i <= pages; i++) {
+
+    doc.setPage(i);
+
+    doc.setFontSize(8);
+
+    doc.text(
+
+        `Page ${i} of ${pages}`,
+
+        170,
+
+        290
+
+    );
+
+}
+
+
 doc.save(
-
-    `${safeOperator}_${dayjs().format(
-
-        "DD-MM-YYYY_HH-mm"
-
-    )}_Report.pdf`
+`${safeOperator}_Shift_Report_${dayjs().format(
+    "DD-MM-YYYY_HH-mm"
+)}.pdf`
 
 );
 

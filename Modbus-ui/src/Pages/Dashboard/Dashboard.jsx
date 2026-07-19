@@ -43,16 +43,20 @@ import operatorService from "../../services/operator.service";
 import ShiftSettingsDialog from "../../Components/ShiftSettingsDialog/ShiftSettingsDialog";
 import shiftService from "../../services/shift.service";
 import ShiftInfoCard from "../../Components/ShiftInfoCard/ShiftInfoCard";
+import { toast } from "react-toastify";
 
 function Dashboard() {
 
    const {
 
-    machineData,
-    connected,
+     machineData,
+    history,
     runtime,
-    events,
-    resetSystem
+    currentInterval,
+    intervalData,
+    resetSystem,
+    connected,
+    events
 
 } = useMachine();
 
@@ -71,7 +75,7 @@ const [editingOperator, setEditingOperator] = useState(
     operatorName === "Unassigned"
 );
 
-const [openShiftSettings, setOpenShiftSettings] = useState(false);
+
 
 const saveOperator = () => {
 
@@ -148,7 +152,7 @@ if (diff <= 0 && !resetExecuted) {
 
     }
 
-    resetSystem();
+    resetSystem(false);
 
     return;
 
@@ -676,16 +680,7 @@ icon={<AccessTimeFilledIcon sx={{fontSize:42}} />}
 
 )}
 
-<Button
-    variant="contained"
-    onClick={() => setOpenShiftSettings(true)}
->
-    Shift Settings
-</Button>
-<ShiftSettingsDialog
-    open={openShiftSettings}
-    onClose={() => setOpenShiftSettings(false)}
-/>
+
 
     <Typography
         sx={{
@@ -734,7 +729,7 @@ icon={<AccessTimeFilledIcon sx={{fontSize:42}} />}
         "Are you sure you want to continue?"
     )
 ) {
-    resetSystem();
+    resetSystem(false);
 }
 
             }}
@@ -769,193 +764,10 @@ icon={<AccessTimeFilledIcon sx={{fontSize:42}} />}
 
         </Button>
 
-        <Button
-
-    variant="contained"
-
-    color={isScheduleActive ? "error" : "primary"}
-
-    startIcon={<ScheduleIcon />}
-
-    onClick={() => {
-
-        if (isScheduleActive) {
-
-            if (
-
-                window.confirm(
-
-                    "Cancel the scheduled automatic reset?"
-
-                )
-
-            ) {
-
-                resetSchedulerService.clear();
-
-                setTimeLeft("No Reset Scheduled");
-
-                setIsScheduleActive(false);
-
-            }
-
-        } else {
-
-            setOpenScheduleDialog(true);
-
-        }
-
-    }}
-
-    sx={{
-
-        px: 3,
-
-        py: 1.3,
-
-        borderRadius: 3,
-
-        textTransform: "none",
-
-        fontWeight: 700,
-
-        boxShadow: isScheduleActive
-
-            ? "0 6px 18px rgba(239,68,68,.35)"
-
-            : "0 6px 18px rgba(37,99,235,.35)"
-
-    }}
-
->
-
-    {isScheduleActive
-
-        ? "Cancel Schedule"
-
-        : "Schedule Reset"}
-
-</Button>
+    
     </Stack>
 
-    {/* Right Information */}
-
-    <Paper
-
-        elevation={0}
-
-        sx={{
-
-            px: 3,
-
-            py: 1.8,
-
-            borderRadius: 3,
-
-            bgcolor: "#F8FAFC",
-
-            border: "1px solid #E2E8F0",
-
-            minWidth: 360
-
-        }}
-
-    >
-
-        <Typography
-
-            variant="subtitle2"
-
-            sx={{
-
-                color: "#64748B",
-
-                fontWeight: 600,
-
-                mb: 1
-
-            }}
-
-        >
-
-            NEXT AUTOMATIC RESET AT :
-
-        </Typography>
-
-        <Typography
-
-            variant="h6"
-
-            sx={{
-
-                fontWeight: 700,
-
-                color: "#1E293B"
-
-            }}
-
-        >
-
-            {(() => {
-
-                const schedule = resetSchedulerService.get();
-
-                if (!schedule || !schedule.enabled) {
-
-                    return "Not Scheduled";
-
-                }
-
-                return dayjs(schedule.resetAt).format(
-
-                    "DD MMM YYYY • hh:mm A"
-
-                );
-
-            })()}
-
-        </Typography>
-
-        <Divider sx={{ my: 1.5 }} />
-
-        <Typography
-
-            sx={{
-
-                fontWeight: 600,
-
-                color: "#475569"
-
-            }}
-
-        >
-
-            Time Remaining
-
-        </Typography>
-
-        <Typography
-
-            variant="h5"
-
-            sx={{
-
-                fontWeight: 800,
-
-                color: "#2563EB",
-
-                letterSpacing: 1
-
-            }}
-
-        >
-
-            {timeLeft}
-
-        </Typography>
-
-    </Paper>
-
+  
 </Box>
 
                     </Grid>

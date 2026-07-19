@@ -106,10 +106,11 @@ shiftService.syncCurrentInterval();
                 onClose={onClose}
                 maxWidth="sm"
                 fullWidth
+                
             >
 
                 <DialogTitle>
-                    Production Cycle Configuration
+                    Change Shift Timings
                 </DialogTitle>
 
                 <DialogContent>
@@ -119,8 +120,8 @@ shiftService.syncCurrentInterval();
                         color="text.secondary"
                         sx={{ mb: 3 }}
                     >
-                        Configure the two production cycle reset times.
-                        Production, runtime and operator information will
+                        Configure the two Shift reset times.
+                        Total Production, runtime and operator information will
                         automatically reset whenever either configured
                         reset time is reached.
                     </Typography>
@@ -137,6 +138,14 @@ shiftService.syncCurrentInterval();
                             <Grid size={{ xs: 12, sm: 6 }}>
 
                                 <TimePicker
+                                  slotProps={{
+        desktopPaper: {
+            elevation: 8
+        },
+        textField: {
+            fullWidth: true
+        }
+    }}
                                     label="Reset Time 1"
                                     value={dayjs(
                                         settings.resetTimes[0],
@@ -162,6 +171,7 @@ shiftService.syncCurrentInterval();
                             <Grid size={{ xs: 12, sm: 6 }}>
 
                                 <TimePicker
+                                
                                     label="Reset Time 2"
                                     value={dayjs(
                                         settings.resetTimes[1],
@@ -201,23 +211,7 @@ shiftService.syncCurrentInterval();
 
                     <Divider sx={{ my: 3 }} />
 
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={
-                                    settings.autoReset
-                                }
-                                onChange={(e) =>
-                                    setSettings({
-                                        ...settings,
-                                        autoReset:
-                                            e.target.checked
-                                    })
-                                }
-                            />
-                        }
-                        label="Enable Automatic Reset"
-                    />
+                  
 
                 </DialogContent>
 

@@ -120,6 +120,7 @@ function ScheduleResetDialog({
     onChange={setTime}
     ampm={false}
     format="HH:mm"
+    
 />
 
                         <FormControlLabel

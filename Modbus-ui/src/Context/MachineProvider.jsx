@@ -14,6 +14,7 @@ import socket from "../Socket/Socket";
 import pdfReportService from "../Components/report/pdfReport.service";
 import operatorService from "../services/operator.service";
 import shiftService from "../services/shift.service";
+import { toast } from "react-toastify";
 
 
 
@@ -223,14 +224,14 @@ setCurrentInterval(
 
 
 function resetSystem() {
-
+toast.success("Shift reset completed successfully.");
     pdfReportService.download(
         machineData,
         history,
-        runtime
+        runtime,
+        currentInterval,
+        intervalData[currentInterval.key]
     );
-
-    alert("reseting done");
 
     socket.emit("reset-system");
 
@@ -240,11 +241,12 @@ function resetSystem() {
 
     EventService.clear();
 
-   shiftService.resetCurrentInterval();
+    shiftService.resetCurrentInterval();
 
-setIntervalData(
-    shiftService.getIntervalData()
-);
+    setIntervalData(
+        shiftService.getIntervalData()
+    );
+
     StorageService.remove(
         APP_CONFIG.STORAGE_KEYS.MACHINE_HISTORY
     );
@@ -267,6 +269,7 @@ setIntervalData(
 
     setOperatorName("Unassigned");
     setOperatorInput("");
+
     setEditingOperator(true);
 
     setMachineData(prev => ({
@@ -274,6 +277,7 @@ setIntervalData(
         totalPipeLength: 0
     }));
 
+  
 }
     return (
 
