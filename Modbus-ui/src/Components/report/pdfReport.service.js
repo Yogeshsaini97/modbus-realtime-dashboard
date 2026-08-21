@@ -119,6 +119,11 @@ class PdfReportService {
 ],
 
 [
+    "Actual Runtime This Shift",
+    formatRuntime(runtime.todayRuntime) || 0
+],
+
+[
     "Shift Elapsed Time",
     getShiftElapsedTime(currentInterval)
 ],
