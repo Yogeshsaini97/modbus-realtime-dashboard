@@ -299,7 +299,7 @@ useEffect(() => {
                             </Typography>
 
                             <Typography variant="h6">
-                               Braiding Machine no. 17
+                               Braiding Machine no. 34
                             </Typography>
         
 

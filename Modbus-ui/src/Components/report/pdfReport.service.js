@@ -78,7 +78,7 @@ class PdfReportService {
 
             body: [
 
-    ["Machine Name", "Braiding Machine No. 17"],
+    ["Machine Name", "Braiding Machine No. 34"],
 
     ["Machine ID", "Machine number 17"],
 
