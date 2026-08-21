@@ -158,7 +158,7 @@ if (diff <= 0 && !resetExecuted) {
 
 }
 
-if (diff > 2000 && resetExecuted) {
+if (diff > 60000 && resetExecuted) {
 
     setResetExecuted(false);
 

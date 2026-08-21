@@ -8,7 +8,7 @@ const client = new ModbusRTU();
 Production Tracking
 -----------------------------------------
 */
-let totalPipeLength = 0;
+let totalPipeLength = 500;
 
 
 let resetRequested = false;
@@ -319,7 +319,7 @@ function resetProductionReal() {
     console.log("SYSTEM RESET REQUEST RECEIVED");
     console.log("====================================");
 
-    totalPipeLength = 0;
+    totalPipeLength = 500;
      // Immediately send latest values
     pollMachineData();
 
