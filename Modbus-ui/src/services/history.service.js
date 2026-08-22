@@ -8,17 +8,6 @@ class HistoryService {
 
     const now = Date.now();
 
-    // Save only every 10 seconds
-    const SAVE_INTERVAL = 60 * 1000; // 1 Minute
-
-if (now - this.lastSaveTime < SAVE_INTERVAL) {
-
-    return this.getHistory();
-
-}
-
-    this.lastSaveTime = now;
-
     const history = StorageService.get(
 
         APP_CONFIG.STORAGE_KEYS.MACHINE_HISTORY,
@@ -26,6 +15,21 @@ if (now - this.lastSaveTime < SAVE_INTERVAL) {
         []
 
     );
+
+    const lastReading = history[history.length - 1];
+    const motorStatusChanged =
+        lastReading && lastReading.motorStatus !== reading.motorStatus;
+
+    // Save a regular snapshot every minute, and immediately save status changes.
+    const SAVE_INTERVAL = 60 * 1000; // 1 Minute
+
+if (now - this.lastSaveTime < SAVE_INTERVAL && !motorStatusChanged) {
+
+    return history;
+
+}
+
+    this.lastSaveTime = now;
 
     history.push(reading);
 

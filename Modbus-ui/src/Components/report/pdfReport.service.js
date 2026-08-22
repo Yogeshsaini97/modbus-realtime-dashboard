@@ -6,6 +6,61 @@ import operatorService from "../../services/operator.service";
 
 
 class PdfReportService {
+
+    getStoppages(history, reportGeneratedAt) {
+        const readings = [...history]
+            .map((reading) => ({
+                ...reading,
+                recordedAt: dayjs(reading.timestamp).valueOf(),
+                status: String(reading.motorStatus || "").toUpperCase()
+            }))
+            .filter((reading) => Number.isFinite(reading.recordedAt))
+            .sort((first, second) => first.recordedAt - second.recordedAt);
+
+        const stoppages = [];
+        let previousStatus = null;
+        let stoppedAt = null;
+
+        readings.forEach((reading) => {
+            if (previousStatus === "ON" && reading.status === "OFF") {
+                stoppedAt = reading.recordedAt;
+            }
+
+            if (
+                previousStatus === "OFF" &&
+                reading.status === "ON" &&
+                stoppedAt !== null
+            ) {
+                stoppages.push({
+                    stoppedAt,
+                    resumedAt: reading.recordedAt,
+                    durationSeconds: Math.max(
+                        0,
+                        Math.floor((reading.recordedAt - stoppedAt) / 1000)
+                    ),
+                    isOngoing: false
+                });
+
+                stoppedAt = null;
+            }
+
+            previousStatus = reading.status;
+        });
+
+        if (previousStatus === "OFF" && stoppedAt !== null) {
+            stoppages.push({
+                stoppedAt,
+                resumedAt: null,
+                durationSeconds: Math.max(
+                    0,
+                    Math.floor((reportGeneratedAt - stoppedAt) / 1000)
+                ),
+                isOngoing: true
+            });
+        }
+
+        return stoppages;
+    }
    
 
     download(
@@ -17,6 +72,8 @@ class PdfReportService {
 ) {
 
          const operatorName = operatorService.get();
+        const reportGeneratedAt = Date.now();
+        const stoppages = this.getStoppages(history, reportGeneratedAt);
 
         if (!history.length) {
 
@@ -89,12 +146,46 @@ class PdfReportService {
     `${currentInterval.start} to ${currentInterval.end}`
 ],
 
-    ["Report Generated On", dayjs().format("DD MMM YYYY HH:mm:ss")],
+    ["Report Generated On", dayjs(reportGeneratedAt).format("DD MMM YYYY HH:mm:ss")],
 
     ["Machine Status", machineData.motorStatus]
 
 ]
 
+        });
+
+        /*
+        ============================================
+        MACHINE STOPPAGE HISTORY
+        ============================================
+        */
+
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
+
+            theme: "grid",
+
+            head: [[
+                "Machine Stopped At",
+                "Machine Resumed At",
+                "Stopped For"
+            ]],
+
+            body: stoppages.length
+                ? stoppages.map((stoppage) => [
+                    dayjs(stoppage.stoppedAt).format("DD MMM YYYY HH:mm:ss"),
+                    stoppage.isOngoing
+                        ? "Still stopped at report generation"
+                        : dayjs(stoppage.resumedAt).format("DD MMM YYYY HH:mm:ss"),
+                    `${formatRuntime(stoppage.durationSeconds)}${
+                        stoppage.isOngoing ? " (ongoing)" : ""
+                    }`
+                ])
+                : [["No machine stoppages recorded", "-", "-"]],
+
+            styles: {
+                fontSize: 8
+            }
         });
 
         /*
