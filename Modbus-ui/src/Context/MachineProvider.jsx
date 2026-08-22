@@ -89,7 +89,15 @@ const [currentInterval, setCurrentInterval] = useState(
 
         socket.on("modbus-data", (payload) => {
 
-           const newState = {
+           const receivedTotalPipeLength =
+    payload.registers.totalPipeLength;
+
+const totalPipeLength =
+    payload.registers.motorStatus === "OFF"
+        ? machineData.totalPipeLength ?? receivedTotalPipeLength
+        : receivedTotalPipeLength;
+
+const newState = {
 
     motorStatus: payload.registers.motorStatus,
 
@@ -97,7 +105,7 @@ const [currentInterval, setCurrentInterval] = useState(
 
     pipeLength: payload.registers.pipeLength,
 
-    totalPipeLength: payload.registers.totalPipeLength,
+    totalPipeLength,
 
     alarm: payload.registers.alarm,
 
@@ -141,7 +149,10 @@ if (intervalChanged) {
 
 }
 
-                shiftService.updateProduction(newState.pipeLength);
+                shiftService.updateProduction(
+                    newState.pipeLength,
+                    newState.motorStatus
+                );
 
 shiftService.updateRuntime(updatedRuntime);
 

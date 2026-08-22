@@ -1,7 +1,11 @@
 const { emitModbusData } = require("./socket");
+const {
+    loadTotalPipeLength,
+    saveTotalPipeLength
+} = require("./production-total.store");
 
 // Machine Status
-let motorStatus = "ON";
+let motorStatus = "OFF";
 
 // Frequency (Hz)
 let frequency = 52;
@@ -10,7 +14,7 @@ let frequency = 52;
 let pipeLength = 0;
 
 // Total Production
-let totalPipeLength = 0;
+let totalPipeLength = loadTotalPipeLength();
 
 
 
@@ -76,10 +80,12 @@ function generateDummyData() {
 
         // Total production
         totalPipeLength += pipeLength;
+        saveTotalPipeLength(totalPipeLength);
 
     } else {
 
-        // Machine OFF
+        // Hold the accumulated total while OFF. Production resumes from this
+        // value when the machine comes back ON.
         pipeLength = 0;
 
     }
@@ -159,6 +165,7 @@ function resetProductionDummy() {
 
     pipeLength = 0;
     totalPipeLength = 0;
+    saveTotalPipeLength(totalPipeLength);
 
     const payload = generateDummyData();
 

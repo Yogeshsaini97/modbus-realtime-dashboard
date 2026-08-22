@@ -1,5 +1,9 @@
 const ModbusRTU = require("modbus-serial");
 const { emitModbusData } = require("./socket");
+const {
+    loadTotalPipeLength,
+    saveTotalPipeLength
+} = require("./production-total.store");
 
 const client = new ModbusRTU();
 
@@ -8,7 +12,7 @@ const client = new ModbusRTU();
 Production Tracking
 -----------------------------------------
 */
-let totalPipeLength = 0;
+let totalPipeLength = loadTotalPipeLength();
 
 
 let resetRequested = false;
@@ -183,8 +187,14 @@ async function pollMachineData() {
 
         console.log("Previous Total       :", totalPipeLength);
 
-        // Add every interval value
-        totalPipeLength += pipeLength;
+        // The PLC may retain its last pipe-length value after a stop.
+        // Keep displaying that value, but only count production while running.
+        if (machineStatus === "ON") {
+
+            totalPipeLength += pipeLength;
+            saveTotalPipeLength(totalPipeLength);
+
+        }
 
         console.log("Updated Total        :", totalPipeLength);
 
@@ -320,6 +330,7 @@ function resetProductionReal() {
     console.log("====================================");
 
     totalPipeLength = 0;
+    saveTotalPipeLength(totalPipeLength);
      // Immediately send latest values
     pollMachineData();
 

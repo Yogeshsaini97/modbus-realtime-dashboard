@@ -172,7 +172,7 @@ class PdfReportService {
            body: [
 
 [
-    "Total Pipe Produced This Shift",
+    "Total Pipe Produced In This Shift",
     formatPipeLength(intervalData.production)
 ],
 
@@ -182,17 +182,17 @@ class PdfReportService {
 ],
 
 [
-    "Shift Elapsed Time",
+    "Total Shift Time",
     getShiftElapsedTime(currentInterval)
 ],
 
 [
-    "Machine Starts",
+    "Machine Starts Count",
     intervalData.startCount
 ],
 
 [
-    "Machine Stops",
+    "Machine Stops Count",
     intervalData.stopCount
 ],
 

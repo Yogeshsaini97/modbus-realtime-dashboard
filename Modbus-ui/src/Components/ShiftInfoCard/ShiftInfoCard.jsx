@@ -431,13 +431,13 @@ return (
                 <Tile
                  
                     icon={<PrecisionManufacturingIcon fontSize="small" />}
-                    title="Total Pipe Produced This Shift"
+                    title="Total Pipe Produced In This Shift"
                     value={`${formatPipeLength(data.production)}`}
                 />
 
                 <Tile
     icon={<AccessTimeIcon fontSize="small" />}
-    title="Shift Elapsed Time"
+    title="Total Shift Time"
     value={getShiftElapsedTime(currentInterval)}
 />
 

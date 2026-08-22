@@ -120,7 +120,13 @@ class ShiftDataService {
 
     }
 
-    updateProduction(pipeLength) {
+    updateProduction(pipeLength, motorStatus) {
+
+        if (motorStatus !== "ON") {
+
+            return;
+
+        }
 
         this.getCurrentIntervalData().production += pipeLength;
 

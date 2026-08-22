@@ -41,3 +41,6 @@ temp/
 
 # nodemon
 .nodemonignore
+
+# persisted runtime production counter
+production-total.json
