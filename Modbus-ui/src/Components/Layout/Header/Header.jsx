@@ -17,23 +17,14 @@ import dayjs from "dayjs";
 import { useMachine } from "../../../Context/MachineContext";
 import { useState } from "react";
 import MachineReportDialog from "../../report/MachineReportDialog";
-import pdfReportService from "../../report/pdfReport.service";
 import vanshLogo from "../../../assets/vansh_logo.jpeg";
 
 
 
 function Header() {
 
-    const { connected } = useMachine();
+    const { connected, downloadReport } = useMachine();
      const [openReport, setOpenReport] = useState(false);
-
-      const {
-         machineData,
-    history,
-    runtime,
-    currentInterval,
-    intervalData
-    } = useMachine();
 
     return (
 
@@ -99,17 +90,7 @@ function Header() {
 
     color="error"
 
-    onClick={() =>
-
-        pdfReportService.download(
-    machineData,
-    history,
-    runtime,
-    currentInterval,
-    intervalData[currentInterval.key]
-)
-
-    }
+    onClick={downloadReport}
 
 >
 

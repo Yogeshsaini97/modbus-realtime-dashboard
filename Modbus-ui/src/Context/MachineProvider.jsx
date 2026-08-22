@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 
 import MachineContext from "./MachineContext";
 
@@ -21,6 +22,7 @@ import { toast } from "react-toastify";
 function MachineProvider({ children }) {
 
     const [connected, setConnected] = useState(false);
+    const [isReportGenerating, setIsReportGenerating] = useState(false);
 const [intervalData, setIntervalData] = useState(
     shiftService.getIntervalData()
 );
@@ -234,15 +236,29 @@ setCurrentInterval(
     }, [machineData, events]);
 
 
-function resetSystem() {
+async function downloadReport() {
+    setIsReportGenerating(true);
+
+    // Yield once so the loader is rendered before jsPDF starts its synchronous
+    // document generation.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    try {
+        pdfReportService.download(
+            machineData,
+            history,
+            runtime,
+            currentInterval,
+            intervalData[currentInterval.key]
+        );
+    } finally {
+        setIsReportGenerating(false);
+    }
+}
+
+async function resetSystem() {
 toast.success("Shift reset completed successfully.");
-    pdfReportService.download(
-        machineData,
-        history,
-        runtime,
-        currentInterval,
-        intervalData[currentInterval.key]
-    );
+    await downloadReport();
 
     socket.emit("reset-system");
 
@@ -310,6 +326,8 @@ toast.success("Shift reset completed successfully.");
 
     currentInterval,
 
+    downloadReport,
+
     resetSystem
 
 }}
@@ -317,6 +335,21 @@ toast.success("Shift reset completed successfully.");
         >
 
             {children}
+
+            <Backdrop
+                open={isReportGenerating}
+                sx={{
+                    color: "#fff",
+                    zIndex: (theme) => theme.zIndex.modal + 1
+                }}
+            >
+                <Box sx={{ textAlign: "center" }}>
+                    <CircularProgress color="inherit" />
+                    <Typography sx={{ mt: 2, fontWeight: 600 }}>
+                        Generating report...
+                    </Typography>
+                </Box>
+            </Backdrop>
 
         </MachineContext.Provider>
 

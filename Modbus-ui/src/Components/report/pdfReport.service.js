@@ -87,6 +87,18 @@ class PdfReportService {
 
         }
 
+        const lastHistoryPipeLength = Number(
+            history[history.length - 1].totalPipeLength
+        );
+        const shiftPipeLength = Number(intervalData.production);
+        const reportedShiftPipeLength =
+            Number.isFinite(lastHistoryPipeLength) &&
+            lastHistoryPipeLength !== shiftPipeLength
+                ? lastHistoryPipeLength
+                : Number.isFinite(shiftPipeLength)
+                    ? shiftPipeLength
+                    : 0;
+
         const doc = new jsPDF();
 
         /*
@@ -194,7 +206,7 @@ class PdfReportService {
 
 [
     "Total Pipe Produced In This Shift",
-    formatPipeLength(intervalData.production)
+    formatPipeLength(reportedShiftPipeLength)
 ],
 
 [
