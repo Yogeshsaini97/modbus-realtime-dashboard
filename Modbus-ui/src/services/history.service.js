@@ -29,29 +29,11 @@ if (now - this.lastSaveTime < SAVE_INTERVAL) {
 
     history.push(reading);
 
-    const cutoffTime =
-
-        now -
-
-        APP_CONFIG.HISTORY_DURATION_HOURS *
-
-        60 *
-
-        60 *
-
-        1000;
-
-    const filteredHistory = history.filter(
-
-        item => item.timestamp >= cutoffTime
-
-    );
-
     StorageService.save(
 
         APP_CONFIG.STORAGE_KEYS.MACHINE_HISTORY,
 
-        filteredHistory
+        history
 
     );
 
@@ -59,7 +41,7 @@ if (now - this.lastSaveTime < SAVE_INTERVAL) {
 
     
 
-    return filteredHistory;
+    return history;
 
 }
 

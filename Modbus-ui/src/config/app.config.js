@@ -2,8 +2,6 @@
 
 export const APP_CONFIG = {
 
-    HISTORY_DURATION_HOURS: 1,
-
     HISTORY_SAMPLE_INTERVAL: 1,
 
     MAX_EVENTS: 500,
