@@ -71,9 +71,13 @@ class PdfReportService {
     intervalData
 ) {
 
-         const operatorName = operatorService.get();
+        const operatorName = operatorService.get();
         const reportGeneratedAt = Date.now();
         const stoppages = this.getStoppages(history, reportGeneratedAt);
+        const totalStoppageSeconds = stoppages.reduce(
+            (total, stoppage) => total + stoppage.durationSeconds,
+            0
+        );
 
         if (!history.length) {
 
@@ -119,6 +123,18 @@ class PdfReportService {
 
         doc.text("Production Shift Report", 14, 40);
 
+        doc.setFontSize(11);
+
+        doc.text("Total Machine Stoppage Time", 14, 48);
+
+        doc.setFontSize(14);
+
+        doc.text(formatRuntime(totalStoppageSeconds), 14, 55);
+
+        doc.setFontSize(12);
+
+        doc.text("General Details", 14, 64);
+
         /*
         ============================================
         MACHINE INFORMATION
@@ -127,7 +143,7 @@ class PdfReportService {
 
         autoTable(doc, {
 
-            startY: 48,
+            startY: 68,
 
             theme: "grid",
 
@@ -161,9 +177,14 @@ class PdfReportService {
         ============================================
         */
 
+        const productionSummaryTitleY = doc.lastAutoTable.finalY + 10;
+
+        doc.setFontSize(12);
+        doc.text("Production Summary Details", 14, productionSummaryTitleY);
+
         autoTable(doc, {
 
-            startY: doc.lastAutoTable.finalY + 10,
+            startY: productionSummaryTitleY + 4,
 
             theme: "grid",
 
@@ -179,6 +200,11 @@ class PdfReportService {
 [
     "Actual Runtime This Shift",
     formatRuntime(runtime.todayRuntime) || 0
+],
+
+[
+    "Total Machine Stoppage Time",
+    formatRuntime(totalStoppageSeconds)
 ],
 
 [
@@ -223,8 +249,13 @@ class PdfReportService {
         ============================================
         */
 
+        const stoppageHistoryTitleY = doc.lastAutoTable.finalY + 10;
+
+        doc.setFontSize(12);
+        doc.text("Machine Stoppage Records", 14, stoppageHistoryTitleY);
+
         autoTable(doc, {
-            startY: doc.lastAutoTable.finalY + 10,
+            startY: stoppageHistoryTitleY + 4,
 
             theme: "grid",
 
@@ -258,8 +289,13 @@ class PdfReportService {
         ============================================
         */
 
+const fullOverviewTitleY = doc.lastAutoTable.finalY + 10;
+
+doc.setFontSize(12);
+doc.text("Full Overview of Records", 14, fullOverviewTitleY);
+
 autoTable(doc, {
-    startY: doc.lastAutoTable.finalY + 10,
+    startY: fullOverviewTitleY + 4,
 
     theme: "grid",
 

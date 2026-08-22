@@ -5,7 +5,7 @@ const {
 } = require("./production-total.store");
 
 // Machine Status
-let motorStatus = "OFF";
+let motorStatus = "ON";
 
 // Frequency (Hz)
 let frequency = 52;
