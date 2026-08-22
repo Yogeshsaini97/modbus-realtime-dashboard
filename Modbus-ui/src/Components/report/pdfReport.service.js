@@ -154,40 +154,7 @@ class PdfReportService {
 
         });
 
-        /*
-        ============================================
-        MACHINE STOPPAGE HISTORY
-        ============================================
-        */
-
-        autoTable(doc, {
-            startY: doc.lastAutoTable.finalY + 10,
-
-            theme: "grid",
-
-            head: [[
-                "Machine Stopped At",
-                "Machine Resumed At",
-                "Stopped For"
-            ]],
-
-            body: stoppages.length
-                ? stoppages.map((stoppage) => [
-                    dayjs(stoppage.stoppedAt).format("DD MMM YYYY HH:mm:ss"),
-                    stoppage.isOngoing
-                        ? "Still stopped at report generation"
-                        : dayjs(stoppage.resumedAt).format("DD MMM YYYY HH:mm:ss"),
-                    `${formatRuntime(stoppage.durationSeconds)}${
-                        stoppage.isOngoing ? " (ongoing)" : ""
-                    }`
-                ])
-                : [["No machine stoppages recorded", "-", "-"]],
-
-            styles: {
-                fontSize: 8
-            }
-        });
-
+        
         /*
         ============================================
         PRODUCTION SUMMARY
@@ -249,6 +216,41 @@ class PdfReportService {
 ]
 
         });
+
+        /*
+        ============================================
+        MACHINE STOPPAGE HISTORY
+        ============================================
+        */
+
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
+
+            theme: "grid",
+
+            head: [[
+                "Machine Stopped At",
+                "Machine Resumed At",
+                "Stopped For"
+            ]],
+
+            body: stoppages.length
+                ? stoppages.map((stoppage) => [
+                    dayjs(stoppage.stoppedAt).format("DD MMM YYYY HH:mm:ss"),
+                    stoppage.isOngoing
+                        ? "Still stopped at report generation"
+                        : dayjs(stoppage.resumedAt).format("DD MMM YYYY HH:mm:ss"),
+                    `${formatRuntime(stoppage.durationSeconds)}${
+                        stoppage.isOngoing ? " (ongoing)" : ""
+                    }`
+                ])
+                : [["No machine stoppages recorded", "-", "-"]],
+
+            styles: {
+                fontSize: 8
+            }
+        });
+
 
         /*
         ============================================
