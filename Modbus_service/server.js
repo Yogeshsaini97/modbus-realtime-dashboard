@@ -24,7 +24,7 @@ const {
 // ===============================
 // CONFIGURATION
 // ===============================
-const USE_DUMMY_DATA = true;
+const USE_DUMMY_DATA = false;
 // true  -> Dummy Service
 // false -> Real PLC
 
